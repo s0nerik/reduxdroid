@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.s0nerik.reduxdroid.state_serializer">
+    <application>
+        <provider
+            android:authorities="${applicationId}.reduxdroid.state_serializer-module"
+            android:name=".Module"
+            />
+    </application>
+</manifest>

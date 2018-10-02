@@ -1,0 +1,7 @@
+apply from: "../module.gradle"
+
+dependencies {
+    implementation deps
+    testImplementation testDeps
+    androidTestImplementation androidTestDeps
+}
