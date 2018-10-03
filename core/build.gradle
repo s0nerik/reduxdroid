@@ -1,5 +1,4 @@
 apply from: "../module.gradle"
-apply from: "../module_databinding.gradle"
 
 dependencies {
     implementation deps
