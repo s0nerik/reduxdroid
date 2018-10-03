@@ -2,8 +2,9 @@ apply from: "../module.gradle"
 
 dependencies {
     implementation project(":core")
+    implementation "android.arch.navigation:navigation-fragment-ktx:1.0.0-alpha06"
+    implementation "android.arch.navigation:navigation-runtime:1.0.0-alpha06"
 
-    implementation deps
     testImplementation testDeps
     androidTestImplementation androidTestDeps
 }
