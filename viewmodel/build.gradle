@@ -1,0 +1,14 @@
+apply from: "../module.gradle"
+
+dependencies {
+    implementation project(":core")
+
+    implementation "me.tatarka.redux:redux-android-lifecycle:$redux_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$androidx_lifecycle_version"
+
+    implementation "com.shopify:livedata-ktx:2.0.1"
+
+    implementation deps
+    testImplementation testDeps
+    androidTestImplementation androidTestDeps
+}
