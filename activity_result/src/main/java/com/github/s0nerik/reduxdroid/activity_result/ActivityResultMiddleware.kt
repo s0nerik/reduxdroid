@@ -3,9 +3,8 @@ package com.github.s0nerik.reduxdroid.activity_result
 import android.app.Activity
 import android.content.Intent
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
-import com.github.s0nerik.reduxdroid.core.TypedMiddleware
+import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.util.weak
-import me.tatarka.redux.middleware.Middleware
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 
@@ -50,8 +49,8 @@ internal class ActivityResultMiddlewareImpl : ActivityResultMiddleware(), KoinCo
         dispatcher.dispatch(ActivityResult(requestCode = requestCode, resultCode = resultCode, data = data))
     }
 
-    override fun run(next: Middleware.Next<Any, Any>, action: StartActivityForResult): Any {
+    override fun run(next: (Any) -> Any, action: StartActivityForResult): Any {
         currentActivity?.startActivityForResult(action.intent, action.requestCode)
-        return next.next(action)
+        return next(action)
     }
 }

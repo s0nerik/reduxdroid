@@ -6,10 +6,9 @@ import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import androidx.navigation.fragment.FragmentNavigator
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
-import com.github.s0nerik.reduxdroid.core.TypedMiddleware
+import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import com.github.s0nerik.reduxdroid.navigation.Nav
-import me.tatarka.redux.middleware.Middleware
 import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 import java.lang.ref.WeakReference
@@ -44,9 +43,9 @@ internal class NavigationMiddlewareImpl(
         }
     }
 
-    override fun run(next: Middleware.Next<Any, Any>, action: Nav): Any {
+    override fun run(next: (Any) -> Any, action: Nav): Any {
         tryNavigate(action)
-        return next.next(action)
+        return next(action)
     }
 
     private fun tryNavigate(action: Nav) {

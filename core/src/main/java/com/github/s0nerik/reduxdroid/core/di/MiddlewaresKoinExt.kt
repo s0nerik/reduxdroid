@@ -1,6 +1,7 @@
 package com.github.s0nerik.reduxdroid.core.di
 
-import me.tatarka.redux.middleware.Middleware
+import com.github.s0nerik.reduxdroid.core.middleware.Middleware
+import com.github.s0nerik.reduxdroid.core.middleware.ReduxMiddleware
 import org.koin.dsl.context.ModuleDefinition
 
 @PublishedApi
@@ -16,5 +17,6 @@ fun ModuleDefinition.middlewares(middlewaresProvider: () -> List<Middleware<*, *
     koinContext.setProperty(MIDDLEWARES_KEY, middlewaresProvider)
 }
 
-internal val ModuleDefinition.appMiddlewares: List<Middleware<Any, Any>>
-        get() = koinContext.getProperty<() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY, { emptyList() })()
+internal val ModuleDefinition.appMiddlewares: List<me.tatarka.redux.middleware.Middleware<Any, Any>>
+    get() = koinContext.getProperty<() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY, { emptyList() })()
+                .map { ReduxMiddleware(it) }
