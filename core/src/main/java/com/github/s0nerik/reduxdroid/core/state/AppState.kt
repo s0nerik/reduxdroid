@@ -14,6 +14,8 @@ data class AppState @PublishedApi internal constructor(
                 state[S::class.jvmName] as S
             }
 
+    inline fun <reified S, T> get(selector: (S) -> T): T = selector(get())
+
     inline fun <reified S : Any> set(s: S): AppState {
         val newState = state.toMutableMap()
         newState[S::class.jvmName] = s
