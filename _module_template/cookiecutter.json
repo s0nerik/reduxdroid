@@ -1,7 +1,0 @@
-{
-  "module_name": "my_module",
-  "dir_name": "feature_{{ cookiecutter.module_name }}",
-  "package_name": "com.github.s0nerik.reduxdroid.{{ cookiecutter.module_name }}",
-  "package_dir": "{{ cookiecutter.package_name | replace('.', '/') }}",
-  "_copy_without_render": [".gradle", "gradle/", "*gradlew", "*gradlew.bat"]
-}

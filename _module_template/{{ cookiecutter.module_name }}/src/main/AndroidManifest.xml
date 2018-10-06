@@ -1,9 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="{{ cookiecutter.package_name }}">
-    <application>
-        <provider
-            android:authorities="${applicationId}.reduxdroid.{{ cookiecutter.module_name }}-module"
-            android:name=".Module"
-            />
-    </application>
-</manifest>
