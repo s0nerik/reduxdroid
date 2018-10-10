@@ -8,12 +8,14 @@ import org.koin.dsl.context.ModuleDefinition
 
 typealias NavBinder<A> = (A) -> Int
 
-inline fun <reified A> ModuleDefinition._bindNavForward(crossinline binder: NavBinder<A>) {
+@PublishedApi
+internal inline fun <reified A> ModuleDefinition._bindNavForward(crossinline binder: NavBinder<A>) {
     val converter: ActionConverter<A, Nav.Forward> = { Nav.Forward(binder(it)) }
     actionConverter(converter)
 }
 
-inline fun <reified A> ModuleDefinition._bindNavBack(inclusive: Boolean, noinline binder: NavBinder<A>?) {
+@PublishedApi
+internal inline fun <reified A> ModuleDefinition._bindNavBack(inclusive: Boolean, noinline binder: NavBinder<A>?) {
     val converter: ActionConverter<A, Nav.Back> = { Nav.Back(binder?.invoke(it), inclusive = inclusive) }
     actionConverter(converter)
 }
