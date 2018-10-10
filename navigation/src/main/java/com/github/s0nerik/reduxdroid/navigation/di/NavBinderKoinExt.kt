@@ -9,35 +9,40 @@ import org.koin.dsl.context.ModuleDefinition
 typealias NavBinder<A> = (A) -> Int
 
 @PublishedApi
-internal inline fun <reified A> ModuleDefinition._bindNavForward(crossinline binder: NavBinder<A>) {
+internal inline fun <reified A> ModuleDefinition._bindNavForward(dropOriginalAction: Boolean, crossinline binder: NavBinder<A>) {
     val converter: ActionConverter<A, Nav.Forward> = { Nav.Forward(binder(it)) }
-    actionConverter(converter)
+    actionConverter(dropOriginalAction, converter)
 }
 
 @PublishedApi
-internal inline fun <reified A> ModuleDefinition._bindNavBack(inclusive: Boolean, noinline binder: NavBinder<A>?) {
+internal inline fun <reified A> ModuleDefinition._bindNavBack(dropOriginalAction: Boolean, inclusive: Boolean, noinline binder: NavBinder<A>?) {
     val converter: ActionConverter<A, Nav.Back> = { Nav.Back(binder?.invoke(it), inclusive = inclusive) }
-    actionConverter(converter)
+    actionConverter(dropOriginalAction, converter)
 }
 
 inline fun <reified A> ModuleDefinition.navForward(
-        @IdRes navId: Int
-) = _bindNavForward<A> { navId }
+        @IdRes navId: Int,
+        dropOriginalAction: Boolean = true
+) = _bindNavForward<A>(dropOriginalAction) { navId }
 
 inline fun <reified A> ModuleDefinition.navForward(
+        dropOriginalAction: Boolean = true,
         crossinline binder: NavBinder<A>
-) = _bindNavForward(binder)
+) = _bindNavForward(dropOriginalAction, binder)
+
+inline fun <reified A> ModuleDefinition.navBack(
+        @IdRes navId: Int,
+        inclusive: Boolean = false,
+        dropOriginalAction: Boolean = true
+) = _bindNavBack<A>(dropOriginalAction, inclusive) { navId }
 
 inline fun <reified A> ModuleDefinition.navBack(
         inclusive: Boolean = false,
-        @IdRes navId: Int
-) = _bindNavBack<A>(inclusive) { navId }
-
-inline fun <reified A> ModuleDefinition.navBack(
-        inclusive: Boolean = false,
+        dropOriginalAction: Boolean = true,
         noinline binder: NavBinder<A>
-) = _bindNavBack(inclusive, binder)
+) = _bindNavBack(dropOriginalAction, inclusive, binder)
 
 inline fun <reified A> ModuleDefinition.navBack(
-        inclusive: Boolean = false
-) = _bindNavBack<A>(inclusive, null)
+        inclusive: Boolean = false,
+        dropOriginalAction: Boolean = true
+) = _bindNavBack<A>(dropOriginalAction, inclusive, null)
