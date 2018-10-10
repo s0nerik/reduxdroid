@@ -10,7 +10,7 @@ internal class ActionConverterMiddleware(
         val converters: Map<KClass<*>, ActionConverterHolder<Any, Any>>,
         val filteredConverters: Map<KClass<*>, List<ActionConverterHolder<Any, Any>>>
 ) : Middleware<Any, Any>, KoinComponent {
-    private val dispatcher: ActionDispatcher by inject(NON_CONVERTED_DISPATCHER)
+    private val dispatcher: ActionDispatcherImpl by inject(NON_CONVERTED_DISPATCHER)
 
     override fun dispatch(next: Middleware.Next<Any, Any>, action: Any): Any {
         val clazz = action::class

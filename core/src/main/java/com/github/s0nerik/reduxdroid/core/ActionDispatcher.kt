@@ -10,7 +10,7 @@ interface ActionDispatcher {
     fun dispatch(thunk: Thunk)
 }
 
-internal open class ActionDispatcherImpl(
+internal class ActionDispatcherImpl(
         private val dispatcher: Dispatcher<Any, Any>
 ) : ActionDispatcher {
     override fun dispatch(action: Any) { dispatcher.dispatch(action) }

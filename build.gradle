@@ -20,7 +20,8 @@ buildscript {
         ]
 
         testDeps = [
-                'junit:junit:4.12'
+                'junit:junit:4.12',
+                'org.koin:koin-test:1.0.1'
         ]
 
         androidTestDeps = [

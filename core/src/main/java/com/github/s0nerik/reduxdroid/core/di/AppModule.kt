@@ -19,8 +19,15 @@ abstract class AppModule(
             get() = modules
     }
 
+    var module: Module
+        get
+        private set
+
+    init {
+        module = module(Path.ROOT, false, false, definition)
+    }
+
     override fun onCreate(): Boolean {
-        val module = module(Path.ROOT, false, false, definition)
         modules += module
         return true
     }

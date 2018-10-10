@@ -6,9 +6,8 @@ import me.tatarka.redux.Dispatcher
 import kotlin.reflect.jvm.jvmName
 
 private val REDUXDROID_CORE_MODULE = "__reduxdroid_core__"
-private val NON_CONVERTED_DISPATCHER_NAME = "__nonConvertedDispatcher__"
 
-internal val NON_CONVERTED_DISPATCHER = "$REDUXDROID_CORE_MODULE.$NON_CONVERTED_DISPATCHER_NAME"
+internal val NON_CONVERTED_DISPATCHER = "$REDUXDROID_CORE_MODULE.ActionDispatcherImpl"
 
 internal class Module : AppModule({
     single { StateStore(AppState(initialStates().mapKeys { it.key.jvmName })) }
@@ -19,15 +18,15 @@ internal class Module : AppModule({
         val dispatcher = Dispatcher.forStore(get<StateStore>(), get<ActionReducer>())
                 .chain(middlewares.reversed())
 
-        ActionDispatcherImpl(dispatcher)
-    } bind ActionDispatcher::class
+        ActionDispatcherImpl(dispatcher) as ActionDispatcher
+    }
 
     module(REDUXDROID_CORE_MODULE) {
-        single(NON_CONVERTED_DISPATCHER_NAME) {
+        single {
             val dispatcher = Dispatcher.forStore(get<StateStore>(), get<ActionReducer>())
                     .chain(appMiddlewares.reversed())
 
             ActionDispatcherImpl(dispatcher)
-        } bind ActionDispatcher::class
+        }
     }
 })
