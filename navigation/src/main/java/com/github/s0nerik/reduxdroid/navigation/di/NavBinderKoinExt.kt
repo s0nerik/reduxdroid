@@ -6,11 +6,11 @@ import com.github.s0nerik.reduxdroid.core.di.actionConverter
 import com.github.s0nerik.reduxdroid.navigation.Nav
 import org.koin.dsl.context.ModuleDefinition
 
-typealias NavBinder<A> = (A) -> Int
+typealias NavBinder<A> = (A) -> Int?
 
 @PublishedApi
 internal inline fun <reified A> ModuleDefinition._bindNavForward(dropOriginalAction: Boolean, crossinline binder: NavBinder<A>) {
-    val converter: ActionConverter<A, Nav.Forward> = { Nav.Forward(binder(it)) }
+    val converter: ActionConverter<A, Nav.Forward> = { binder(it)?.let { Nav.Forward(it) } }
     actionConverter(dropOriginalAction, converter)
 }
 
