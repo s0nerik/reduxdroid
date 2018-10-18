@@ -2,7 +2,7 @@ apply from: "../module.gradle"
 
 dependencies {
     implementation project(":core")
-    implementation "com.shopify:livedata-ktx:2.0.1"
+    implementation "androidx.lifecycle:lifecycle-livedata:$androidx_lifecycle_version"
 
     testImplementation testDeps
     androidTestImplementation androidTestDeps
