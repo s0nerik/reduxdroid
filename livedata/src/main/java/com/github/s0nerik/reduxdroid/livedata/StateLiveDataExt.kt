@@ -16,3 +16,7 @@ inline fun <reified S, T : Any> LiveData<AppState>.get(crossinline selector: (S)
 @MainThread
 inline fun <reified S, T : Any> LiveData<AppState>.get(crossinline selector: (S) -> T?, default: T) =
         Transformations.map(this) { it.get(selector) ?: default }
+
+@MainThread
+inline fun <reified S, T : Any?> LiveData<AppState>.getNullable(crossinline selector: (S) -> T) =
+        Transformations.map(this) { it.get(selector) }
