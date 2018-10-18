@@ -27,7 +27,7 @@ abstract class ReduxViewModel(
     fun <T> LiveData<T>.mutable(actionProvider: (T) -> Any): MutableLiveData<T> {
         val result = object : MediatorLiveData<T>() {
             override fun setValue(value: T) {
-                dispatcher.dispatch(actionProvider(value))
+                dispatch(actionProvider(value))
             }
 
             fun doSetValue(value: T) {
@@ -42,7 +42,7 @@ abstract class ReduxViewModel(
     fun <T> LiveData<T>.mutableThunk(thunkProvider: (T) -> Thunk): MutableLiveData<T> {
         val result = object : MediatorLiveData<T>() {
             override fun setValue(value: T) {
-                dispatcher.dispatch(thunkProvider(value))
+                dispatch(thunkProvider(value))
             }
 
             fun doSetValue(value: T) {
