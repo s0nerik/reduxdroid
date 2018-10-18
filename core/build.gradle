@@ -8,7 +8,9 @@ dependencies {
     api "me.tatarka.redux:redux-core:$redux_version"
     implementation "me.tatarka.redux:redux-thunk:$redux_version"
 
-    api "org.koin:koin-core:$koin_version"
+    api("org.koin:koin-core:$koin_version") {
+        exclude group: "org.jetbrains.kotlin"
+    }
 
     implementation deps
     testImplementation testDeps

@@ -4,6 +4,7 @@ dependencies {
     implementation project(":core")
     implementation "androidx.lifecycle:lifecycle-livedata:$androidx_lifecycle_version"
 
+    implementation deps
     testImplementation testDeps
     androidTestImplementation androidTestDeps
 }
