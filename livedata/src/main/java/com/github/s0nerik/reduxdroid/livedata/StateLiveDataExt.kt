@@ -1,20 +1,14 @@
 package com.github.s0nerik.reduxdroid.livedata
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
 import com.github.s0nerik.reduxdroid.core.state.AppState
-import com.shopify.livedataktx.map
-import com.shopify.livedataktx.nonNull
 
-inline fun <reified S, T : Any> LiveData<AppState>.get(crossinline mapper: (S) -> T) =
-        nonNull().map { state -> mapper(state.get()) }
+@MainThread
+inline fun <reified S> LiveData<AppState>.get() =
+        Transformations.map(this) { it.get<S>() }
 
-inline fun <reified S, T : Any> LiveData<AppState>.getNonNull(crossinline mapper: (S) -> T?) =
-        nonNull().map { state -> mapper(state.get()) }
-                .nonNull()
-                .map { it!! }
-
-inline fun <reified S, T : Any> LiveData<AppState>.getNullable(crossinline mapper: (S) -> T?) =
-        nonNull().map { state -> mapper(state.get()) }
-
-inline fun <reified S, T : Any> LiveData<AppState>.getAsString(crossinline mapper: (S) -> T?, nullStr: String = "") =
-        nonNull().map { state -> mapper(state.get())?.toString() ?: nullStr }
+@MainThread
+inline fun <reified S, T> LiveData<AppState>.get(crossinline selector: (S) -> T) =
+        Transformations.map(this) { it.get(selector) }
