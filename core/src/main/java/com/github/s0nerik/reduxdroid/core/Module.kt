@@ -13,7 +13,7 @@ internal class Module : AppModule({
     single { StateStore(AppState(initialStates().mapKeys { it.key.jvmName })) }
 
     single {
-        val middlewares = listOf(ActionConverterMiddleware(actionConverters, filteredActionConverters)) + appMiddlewares
+        val middlewares = listOf(ActionConverterMiddleware(actionConverters, nonUniqueActionConverters)) + appMiddlewares
 
         val dispatcher = Dispatcher.forStore(get<StateStore>(), get<ActionReducer>())
                 .chain(middlewares.reversed())

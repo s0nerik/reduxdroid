@@ -12,12 +12,7 @@ import org.koin.standalone.inject
 import org.koin.test.KoinTest
 import org.koin.test.checkModules
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * @see [Testing documentation](http://d.android.com/tools/testing)
- */
-class ActionDispatcherUnitTest : KoinTest {
+class ActionDispatcherTest : KoinTest {
     private val actionDispatcher: ActionDispatcher by inject()
     private val nonConvertedActionDispatcher: ActionDispatcherImpl by inject(NON_CONVERTED_DISPATCHER)
 
