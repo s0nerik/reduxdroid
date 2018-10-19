@@ -6,9 +6,6 @@ import kotlin.reflect.KClass
 @PublishedApi
 internal val ACTION_CONVERTERS_KEY = "_actionConverters"
 
-@PublishedApi
-internal val NON_UNIQUE_ACTION_CONVERTERS_KEY = "_nonUniqueActionConverters"
-
 typealias ActionConverter<A1, A2> = (A1) -> A2?
 
 @PublishedApi
@@ -29,10 +26,7 @@ internal inline fun <A1, A2> _filteredActionConverter(
 }
 
 internal val ModuleDefinition.actionConverters
-    get() = getUniqueKeyMap<KClass<*>, ActionConverterHolder<Any, Any>>(ACTION_CONVERTERS_KEY)
-
-internal val ModuleDefinition.nonUniqueActionConverters
-    get() = getNonUniqueKeyMap<KClass<*>, ActionConverterHolder<Any, Any>>(NON_UNIQUE_ACTION_CONVERTERS_KEY)
+    get() = getNonUniqueKeyMap<KClass<*>, ActionConverterHolder<Any, Any>>(ACTION_CONVERTERS_KEY)
 
 /**
  * Registers the action converter to be used when action [A] gets dispatched.
@@ -44,22 +38,11 @@ internal val ModuleDefinition.nonUniqueActionConverters
 inline fun <reified A> ModuleDefinition.actionConverter(
         dropOriginalAction: Boolean = true,
         noinline converter: ActionConverter<A, Any>
-) {
-    if (dropOriginalAction) {
-        addUniqueKeyMapEntry(
-                propertyName = ACTION_CONVERTERS_KEY,
-                itemKey = A::class,
-                itemValue = ActionConverterHolder(dropOriginalAction, converter),
-                duplicateKeyError = "Only one ActionConverter(dropOriginalAction = true) can be registered. You still can register multiple filtered ActionConverters or ActionConverter(dropOriginalAction = false) for this action. Action type: ${A::class}"
-        )
-    } else {
-        addNonUniqueKeyMapEntry(
-                propertyName = NON_UNIQUE_ACTION_CONVERTERS_KEY,
-                itemKey = A::class,
-                itemValue = ActionConverterHolder(dropOriginalAction, converter)
-        )
-    }
-}
+) = addNonUniqueKeyMapEntry(
+        propertyName = ACTION_CONVERTERS_KEY,
+        itemKey = A::class,
+        itemValue = ActionConverterHolder(dropOriginalAction, converter)
+)
 
 /**
  * Registers the action converter to be used when action [A] gets dispatched.
@@ -74,7 +57,7 @@ inline fun <reified A> ModuleDefinition.actionConverter(
         crossinline converter: ActionConverter<A, Any>,
         crossinline filter: (A) -> Boolean
 ) = addNonUniqueKeyMapEntry(
-        propertyName = NON_UNIQUE_ACTION_CONVERTERS_KEY,
+        propertyName = ACTION_CONVERTERS_KEY,
         itemKey = A::class,
         itemValue = ActionConverterHolder(dropOriginalAction, _filteredActionConverter(converter, filter))
 )

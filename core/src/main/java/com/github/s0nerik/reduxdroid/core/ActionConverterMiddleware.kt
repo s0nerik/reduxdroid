@@ -1,41 +1,43 @@
 package com.github.s0nerik.reduxdroid.core
 
+import com.github.s0nerik.reduxdroid.core.di.ActionConverter
 import com.github.s0nerik.reduxdroid.core.di.ActionConverterHolder
 import me.tatarka.redux.middleware.Middleware
 import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
 import kotlin.reflect.KClass
 
+private data class ConvertersHolder(
+        val dropOriginalAction: Boolean,
+        val converters: List<ActionConverter<Any, Any>>
+)
+
 internal class ActionConverterMiddleware(
-        val converters: Map<KClass<*>, ActionConverterHolder<Any, Any>>,
-        val filteredConverters: Map<KClass<*>, List<ActionConverterHolder<Any, Any>>>
+        converters: Map<KClass<*>, List<ActionConverterHolder<Any, Any>>>
 ) : Middleware<Any, Any>, KoinComponent {
-    private val dispatcher: ActionDispatcherImpl by inject(NON_CONVERTED_DISPATCHER)
+    private val converterHolders: Map<KClass<*>, ConvertersHolder> = converters.mapValues {
+        ConvertersHolder(
+                dropOriginalAction = it.value.asIterable().map { it.dropOriginalAction }.contains(true),
+                converters = it.value.map { it.converter }
+        )
+    }
 
     override fun dispatch(next: Middleware.Next<Any, Any>, action: Any): Any {
         val clazz = action::class
+        val holder = converterHolders[clazz]
+        if (holder != null) {
+            var resultAction: Any = Unit
 
-        filteredConverters[clazz]?.let { filteredConverters ->
-            filteredConverters.forEach { converterHolder ->
-                val convertedAction = converterHolder.converter(action)
-                if (convertedAction != null)
-                    return doDispatch(next, action, convertedAction, converterHolder.dropOriginalAction)
+            if (!holder.dropOriginalAction)
+                resultAction = next.next(action)
+
+            holder.converters.forEach { converter ->
+                converter(action)?.let {
+                    resultAction = next.next(it)
+                }
             }
+            return resultAction
+        } else {
+            return next.next(action)
         }
-
-        converters[clazz]?.let { converterHolder ->
-            val convertedAction = converterHolder.converter(action)
-            if (convertedAction != null)
-                return doDispatch(next, action, convertedAction, converterHolder.dropOriginalAction)
-        }
-
-        return doDispatch(next, action, action, true)
-    }
-
-    private fun doDispatch(next: Middleware.Next<Any, Any>, originalAction: Any, convertedAction: Any, dropOriginalAction: Boolean): Any {
-        if (!dropOriginalAction)
-            dispatcher.dispatch(originalAction)
-
-        return next.next(convertedAction)
     }
 }

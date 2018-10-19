@@ -14,7 +14,6 @@ import org.koin.test.checkModules
 
 class ActionDispatcherTest : KoinTest {
     private val actionDispatcher: ActionDispatcher by inject()
-    private val nonConvertedActionDispatcher: ActionDispatcherImpl by inject(NON_CONVERTED_DISPATCHER)
 
     private val modules
         get() = listOf(
@@ -42,15 +41,5 @@ class ActionDispatcherTest : KoinTest {
     @Test
     fun `ActionDispatcher resolves successfully`() {
         actionDispatcher.dispatch(Unit)
-    }
-
-    @Test
-    fun `non-converted ActionDispatcher resolves successfully`() {
-        nonConvertedActionDispatcher.dispatch(Unit)
-    }
-
-    @Test
-    fun `non-converted ActionDispatcher is not the same as normal ActionDispatcher`() {
-        Assert.assertNotSame(actionDispatcher, nonConvertedActionDispatcher)
     }
 }
