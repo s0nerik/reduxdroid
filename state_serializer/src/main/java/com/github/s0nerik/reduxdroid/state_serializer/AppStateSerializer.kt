@@ -46,7 +46,7 @@ internal class AppStateSerializerImpl(
             doSave()
 
             if (debugMode) {
-                Log.d("AppStateSerializer", "State serialization took $start millis")
+                Log.d("AppStateSerializer", "State serialization took ${System.currentTimeMillis() - start} millis")
             }
         } catch (t: Throwable) {
             if (debugMode) {
@@ -72,7 +72,7 @@ internal class AppStateSerializerImpl(
             doRestore()
 
             if (debugMode) {
-                Log.d("AppStateSerializer", "State deserialization took $start millis")
+                Log.d("AppStateSerializer", "State deserialization took ${System.currentTimeMillis() - start} millis")
             }
         } catch (t: Throwable) {
             if (debugMode) {
