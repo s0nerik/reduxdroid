@@ -1,6 +1,7 @@
 package com.github.s0nerik.reduxdroid.state_serializer
 
 import android.content.Context
+import android.util.Log
 import com.github.s0nerik.reduxdroid.core.StateStore
 import com.github.s0nerik.reduxdroid.core.state.AppState
 import kotlinx.serialization.KSerializer
@@ -12,6 +13,7 @@ import kotlin.reflect.KClass
 interface AppStateSerializer {
     fun save()
     fun restore()
+    var debugMode: Boolean
 }
 
 internal class AppStateSerializerImpl(
@@ -21,6 +23,8 @@ internal class AppStateSerializerImpl(
 ) : AppStateSerializer {
     private val serialContext: SerialContext
     private val cbor: CBOR
+
+    override var debugMode: Boolean = false
 
     init {
         serialContext = MutableSerialContextImpl().apply {
@@ -33,6 +37,25 @@ internal class AppStateSerializerImpl(
     }
 
     override fun save() {
+        try {
+            var start: Long = 0
+            if (debugMode) {
+                start = System.currentTimeMillis()
+            }
+
+            doSave()
+
+            if (debugMode) {
+                Log.d("AppStateSerializer", "State serialization took $start millis")
+            }
+        } catch (t: Throwable) {
+            if (debugMode) {
+                Log.e("AppStateSerializer", "State serialization error", t)
+            }
+        }
+    }
+
+    private fun doSave() {
         ctx.openFileOutput(APP_STATE_FILE_NAME, Context.MODE_PRIVATE).use {
             it.write(cbor.dump(store.state))
             it.flush()
@@ -41,12 +64,29 @@ internal class AppStateSerializerImpl(
 
     override fun restore() {
         try {
-            ctx.openFileInput(APP_STATE_FILE_NAME).use {
-                val state = cbor.load<AppState>(it.readBytes())
-                store.state = state
+            var start: Long = 0
+            if (debugMode) {
+                start = System.currentTimeMillis()
             }
-            ctx.deleteFile(APP_STATE_FILE_NAME)
-        } catch (ignore: Throwable) {}
+
+            doRestore()
+
+            if (debugMode) {
+                Log.d("AppStateSerializer", "State deserialization took $start millis")
+            }
+        } catch (t: Throwable) {
+            if (debugMode) {
+                Log.e("AppStateSerializer", "State deserialization error", t)
+            }
+        }
+    }
+
+    private fun doRestore() {
+        ctx.openFileInput(APP_STATE_FILE_NAME).use {
+            val state = cbor.load<AppState>(it.readBytes())
+            store.state = state
+        }
+        ctx.deleteFile(APP_STATE_FILE_NAME)
     }
 
     companion object {
