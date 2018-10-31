@@ -6,8 +6,7 @@ import com.github.s0nerik.reduxdroid.core.StateStore
 import com.github.s0nerik.reduxdroid.core.state.AppState
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.CBOR
-import kotlinx.serialization.context.MutableSerialContextImpl
-import kotlinx.serialization.context.SerialContext
+import kotlinx.serialization.context.SimpleModule
 import kotlin.reflect.KClass
 
 interface AppStateSerializer {
@@ -21,19 +20,16 @@ internal class AppStateSerializerImpl(
         private val ctx: Context,
         private val serializers: Map<KClass<Any>, KSerializer<Any>>
 ) : AppStateSerializer {
-    private val serialContext: SerialContext
     private val cbor: CBOR
 
     override var debugMode: Boolean = false
 
     init {
-        serialContext = MutableSerialContextImpl().apply {
+        cbor = CBOR().apply {
             serializers.forEach {
-                registerSerializer(it.key, it.value)
+                install(SimpleModule(it.key, it.value))
             }
         }
-
-        cbor = CBOR(context = serialContext)
     }
 
     override fun save() {
@@ -57,7 +53,7 @@ internal class AppStateSerializerImpl(
 
     private fun doSave() {
         ctx.openFileOutput(APP_STATE_FILE_NAME, Context.MODE_PRIVATE).use {
-            it.write(cbor.dump(store.state))
+            it.write(cbor.dump(AppState.serializer(), store.state))
             it.flush()
         }
     }
@@ -83,7 +79,7 @@ internal class AppStateSerializerImpl(
 
     private fun doRestore() {
         ctx.openFileInput(APP_STATE_FILE_NAME).use {
-            val state = cbor.load<AppState>(it.readBytes())
+            val state = cbor.load(AppState.serializer(), it.readBytes())
             store.state = state
         }
         ctx.deleteFile(APP_STATE_FILE_NAME)
