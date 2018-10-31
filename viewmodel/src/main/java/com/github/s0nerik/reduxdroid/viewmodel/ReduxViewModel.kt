@@ -17,7 +17,7 @@ abstract class ReduxViewModel(
 ) : ViewModel(), ActionDispatcher by dispatcher {
 
     @get:MainThread
-    protected val state: LiveData<AppState> by lazy { LiveDataAdapter.liveData(store) }
+    protected val state: LiveData<AppState> = LiveDataAdapter.liveData(store)
 
     @get:MainThread
     protected val currentState: AppState
