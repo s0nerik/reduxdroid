@@ -36,7 +36,7 @@ internal val ModuleDefinition.actionConverters
  * @see [ModuleDefinition.actionConverter]
  */
 inline fun <reified A> ModuleDefinition.actionConverter(
-        dropOriginalAction: Boolean = true,
+        dropOriginalAction: Boolean = false,
         noinline converter: ActionConverter<A, Any>
 ) = addNonUniqueKeyMapEntry(
         propertyName = ACTION_CONVERTERS_KEY,
@@ -53,7 +53,7 @@ inline fun <reified A> ModuleDefinition.actionConverter(
  * @see [ModuleDefinition.reducer]
  */
 inline fun <reified A> ModuleDefinition.actionConverter(
-        dropOriginalAction: Boolean = true,
+        dropOriginalAction: Boolean = false,
         crossinline converter: ActionConverter<A, Any>,
         crossinline filter: (A) -> Boolean
 ) = addNonUniqueKeyMapEntry(

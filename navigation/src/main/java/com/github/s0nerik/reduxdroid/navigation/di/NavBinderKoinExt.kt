@@ -22,27 +22,27 @@ internal inline fun <reified A> ModuleDefinition._bindNavBack(dropOriginalAction
 
 inline fun <reified A> ModuleDefinition.navForward(
         @IdRes navId: Int,
-        dropOriginalAction: Boolean = true
+        dropOriginalAction: Boolean = false
 ) = _bindNavForward<A>(dropOriginalAction) { navId }
 
 inline fun <reified A> ModuleDefinition.navForward(
-        dropOriginalAction: Boolean = true,
+        dropOriginalAction: Boolean = false,
         crossinline binder: NavBinder<A>
 ) = _bindNavForward(dropOriginalAction, binder)
 
 inline fun <reified A> ModuleDefinition.navBack(
         @IdRes navId: Int,
         inclusive: Boolean = false,
-        dropOriginalAction: Boolean = true
+        dropOriginalAction: Boolean = false
 ) = _bindNavBack<A>(dropOriginalAction, inclusive) { navId }
 
 inline fun <reified A> ModuleDefinition.navBack(
         inclusive: Boolean = false,
-        dropOriginalAction: Boolean = true,
+        dropOriginalAction: Boolean = false,
         noinline binder: NavBinder<A>
 ) = _bindNavBack(dropOriginalAction, inclusive, binder)
 
 inline fun <reified A> ModuleDefinition.navBack(
         inclusive: Boolean = false,
-        dropOriginalAction: Boolean = true
+        dropOriginalAction: Boolean = false
 ) = _bindNavBack<A>(dropOriginalAction, inclusive, null)
