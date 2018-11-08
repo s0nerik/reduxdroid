@@ -1,7 +1,6 @@
 package com.github.s0nerik.reduxdroid.core
 
 import com.github.s0nerik.reduxdroid.core.di.actionConverter
-import com.github.s0nerik.reduxdroid.core.di.combinedReducer
 import com.github.s0nerik.reduxdroid.core.di.middlewares
 import com.github.s0nerik.reduxdroid.core.middleware.middleware
 import com.github.s0nerik.reduxdroid.core.state.AppState
@@ -33,7 +32,6 @@ class ActionConverterMiddlewareTest : KoinTest {
                 module(definition = testModuleDefinition),
                 module {
                     testMiddleware = TestMiddleware<AppState, Any, Any>(store)
-                    combinedReducer()
                     middlewares {
                         listOf(
                                 middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }

@@ -17,6 +17,5 @@ fun ModuleDefinition.middlewares(middlewaresProvider: () -> List<Middleware<*, *
     koinContext.setProperty(MIDDLEWARES_KEY, middlewaresProvider)
 }
 
-internal val ModuleDefinition.appMiddlewares: List<me.tatarka.redux.middleware.Middleware<Any, Any>>
+internal val ModuleDefinition.appMiddlewares: List<Middleware<Any, Any>>
     get() = koinContext.getProperty<() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY, { emptyList() })()
-                .map { ReduxMiddleware(it) }

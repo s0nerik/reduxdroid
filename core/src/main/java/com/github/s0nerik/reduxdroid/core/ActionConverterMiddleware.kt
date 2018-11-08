@@ -2,7 +2,7 @@ package com.github.s0nerik.reduxdroid.core
 
 import com.github.s0nerik.reduxdroid.core.di.ActionConverter
 import com.github.s0nerik.reduxdroid.core.di.ActionConverterHolder
-import me.tatarka.redux.middleware.Middleware
+import com.github.s0nerik.reduxdroid.core.middleware.Middleware
 import org.koin.standalone.KoinComponent
 import kotlin.reflect.KClass
 
@@ -21,23 +21,23 @@ internal class ActionConverterMiddleware(
         )
     }
 
-    override fun dispatch(next: Middleware.Next<Any, Any>, action: Any): Any {
+    override fun dispatch(next: (Any) -> Any, action: Any): Any {
         val clazz = action::class
         val holder = converterHolders[clazz]
         if (holder != null) {
             var resultAction: Any = Unit
 
             if (!holder.dropOriginalAction)
-                resultAction = next.next(action)
+                resultAction = next(action)
 
             holder.converters.forEach { converter ->
                 converter(action)?.let {
-                    resultAction = next.next(it)
+                    resultAction = next(it)
                 }
             }
             return resultAction
         } else {
-            return next.next(action)
+            return next(action)
         }
     }
 }
