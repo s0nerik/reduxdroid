@@ -2,6 +2,7 @@ package com.github.s0nerik.reduxdroid.activity_result
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.util.weak
@@ -34,12 +35,16 @@ data class ActivityResult internal constructor(
 abstract class ActivityResultMiddleware : TypedMiddleware<StartActivityForResult>(StartActivityForResult::class) {
     abstract fun attach(activity: Activity)
     abstract fun notifyResult(requestCode: Int, resultCode: Int, data: Intent?)
+
+    abstract var debugMode: Boolean
 }
 
 internal class ActivityResultMiddlewareImpl : ActivityResultMiddleware(), KoinComponent {
     private val dispatcher: ActionDispatcher by inject()
 
     private var currentActivity by weak<Activity>()
+
+    override var debugMode: Boolean = false
 
     override fun attach(activity: Activity) {
         currentActivity = activity
@@ -50,7 +55,13 @@ internal class ActivityResultMiddlewareImpl : ActivityResultMiddleware(), KoinCo
     }
 
     override fun run(next: (Any) -> Any, action: StartActivityForResult): Any {
-        currentActivity?.startActivityForResult(action.intent, action.requestCode)
+        currentActivity?.let { activity ->
+            if (action.intent.resolveActivity(activity.packageManager) != null) {
+                activity.startActivityForResult(action.intent, action.requestCode)
+            } else if (debugMode) {
+                Log.e("ActivityResultMW", "There's no activity that can handle a given intent. Action: ${action}")
+            }
+        }
         return next(action)
     }
 }
