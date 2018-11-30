@@ -1,8 +1,13 @@
 include ':core'
-include ':activity_result'
-include ':navigation'
-include ':state_serializer'
-include ':livedata'
-include ':viewmodel'
 include ':util'
 include ':testing'
+
+include ':livedata'
+include ':viewmodel'
+
+include ':state_serializer'
+
+include ':navigation'
+
+include ':activity_result'
+include ':permissions'

@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.s0nerik.reduxdroid.permissions">
+    <application>
+        <provider
+            android:authorities="${applicationId}.reduxdroid.permissions-module"
+            android:name="com.github.s0nerik.reduxdroid.permissions.Module"
+            />
+    </application>
+</manifest>
