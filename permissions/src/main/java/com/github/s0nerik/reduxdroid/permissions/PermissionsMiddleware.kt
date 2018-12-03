@@ -63,6 +63,8 @@ internal class PermissionsMiddlewareImpl : PermissionsMiddleware(), KoinComponen
     }
 
     override fun run(next: (Any) -> Any, action: RequestPermissions): Any {
+        val nextResult = next(action)
+
         currentActivity?.let { activity ->
             var requestPermissionsNeeded = false
             action.permissions.forEach {
@@ -78,12 +80,12 @@ internal class PermissionsMiddlewareImpl : PermissionsMiddleware(), KoinComponen
             } else {
                 val results = mutableMapOf<String, Boolean>()
                 action.permissions.forEach { results[it] = true }
-                next(RequestPermissionsResult(action.requestCode, results))
+                dispatcher.dispatch(RequestPermissionsResult(action.requestCode, results))
                 if (debugMode) {
                     Log.d("PermissionsMiddleware", "Requested permissions are already granted. Permissions: ${action.permissions}")
                 }
             }
         }
-        return next(action)
+        return nextResult
     }
 }
