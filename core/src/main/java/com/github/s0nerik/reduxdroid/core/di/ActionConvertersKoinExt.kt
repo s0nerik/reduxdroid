@@ -30,34 +30,19 @@ internal val ModuleDefinition.actionConverters
 
 /**
  * Registers the action converter to be used when action [A] gets dispatched.
- * Every time the action [A] gets dispatched - it will be mapped to the specified action and passed downstream.
- * Registering a reducer for the same action type more than once using this method is prohibited.
- *
- * @see [ModuleDefinition.actionConverter]
- */
-inline fun <reified A> ModuleDefinition.actionConverter(
-        dropOriginalAction: Boolean = false,
-        noinline converter: ActionConverter<A, Any>
-) = addNonUniqueKeyMapEntry(
-        propertyName = ACTION_CONVERTERS_KEY,
-        itemKey = A::class,
-        itemValue = ActionConverterHolder(dropOriginalAction, converter)
-)
-
-/**
- * Registers the action converter to be used when action [A] gets dispatched.
  * Every time the action [A] gets dispatched - it will be mapped to the specified action and passed downstream, but
  * only if [filter] returns true, otherwise original action would be dispatched.
  * Registering a reducer for the same action type more than once using this method is prohibited.
  *
  * @see [ModuleDefinition.reducer]
  */
-inline fun <reified A> ModuleDefinition.actionConverter(
+inline fun <reified A : Any> ModuleDefinition.actionConverter(
+        actionClass: KClass<A> = A::class,
         dropOriginalAction: Boolean = false,
-        crossinline converter: ActionConverter<A, Any>,
-        crossinline filter: (A) -> Boolean
+        crossinline filter: (A) -> Boolean = { true },
+        crossinline converter: ActionConverter<A, Any>
 ) = addNonUniqueKeyMapEntry(
         propertyName = ACTION_CONVERTERS_KEY,
-        itemKey = A::class,
+        itemKey = actionClass,
         itemValue = ActionConverterHolder(dropOriginalAction, _filteredActionConverter(converter, filter))
 )
