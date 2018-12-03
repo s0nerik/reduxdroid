@@ -67,7 +67,7 @@ class ActionConverterMiddlewareTest : KoinTest {
 
         dispatcher.dispatch(Action1)
 
-        Assert.assertEquals(1, testMiddleware.actions().size)
+        Assert.assertArrayEquals(arrayOf(Action2), testMiddleware.actions().toTypedArray())
     }
 
     @Test
@@ -101,6 +101,19 @@ class ActionConverterMiddlewareTest : KoinTest {
             actionConverter<Action1>(dropOriginalAction = false) { Action2 }
             actionConverter<Action1>(dropOriginalAction = false) { Action3 }
             actionConverter<Action1>(dropOriginalAction = false) { Action4 }
+        }
+
+        dispatcher.dispatch(Action1)
+
+        Assert.assertArrayEquals(arrayOf(Action1, Action2, Action3, Action4), testMiddleware.actions().toTypedArray())
+    }
+
+    @Test
+    fun `actionConverters can return actions that itself will be converted to another actions`() {
+        val testMiddleware = startTestKoin {
+            actionConverter<Action1> { Action2 }
+            actionConverter<Action2> { Action3 }
+            actionConverter<Action3> { Action4 }
         }
 
         dispatcher.dispatch(Action1)
