@@ -36,13 +36,12 @@ internal val ModuleDefinition.actionConverters
  *
  * @see [ModuleDefinition.reducer]
  */
-inline fun <reified A : Any> ModuleDefinition.actionConverter(
-        actionClass: KClass<A> = A::class,
+inline fun <reified A> ModuleDefinition.actionConverter(
         dropOriginalAction: Boolean = false,
         crossinline filter: (A) -> Boolean = { true },
         crossinline converter: ActionConverter<A, Any>
 ) = addNonUniqueKeyMapEntry(
         propertyName = ACTION_CONVERTERS_KEY,
-        itemKey = actionClass,
+        itemKey = A::class,
         itemValue = ActionConverterHolder(dropOriginalAction, _filteredActionConverter(converter, filter))
 )
