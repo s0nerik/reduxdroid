@@ -120,4 +120,18 @@ class ActionConverterMiddlewareTest : KoinTest {
 
         Assert.assertArrayEquals(arrayOf(Action1, Action2, Action3, Action4), testMiddleware.actions().toTypedArray())
     }
+
+    @Test
+    fun `actionConverter dispatches converted actions in registration order`() {
+        val testMiddleware = startTestKoin {
+            actionConverter<Action1> { Action2 }
+            actionConverter<Action2> { Action3 }
+            actionConverter<Action3> { Action4 }
+            actionConverter<Action1> { Action2 }
+        }
+
+        dispatcher.dispatch(Action1)
+
+        Assert.assertArrayEquals(arrayOf(Action1, Action2, Action3, Action4, Action2, Action3, Action4), testMiddleware.actions().toTypedArray())
+    }
 }
