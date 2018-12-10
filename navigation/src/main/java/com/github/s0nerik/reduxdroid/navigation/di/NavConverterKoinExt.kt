@@ -5,6 +5,18 @@ import com.github.s0nerik.reduxdroid.core.di.actionConverter
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import org.koin.dsl.context.ModuleDefinition
 
+fun ModuleDefinition.convertNavFrom(@IdRes id: Int, actionProvider: () -> Any) =
+        actionConverter<DidNavigate>(
+                filter = { it.to == id },
+                converter = { actionProvider() }
+        )
+
+fun ModuleDefinition.convertNavTo(@IdRes id: Int, actionProvider: () -> Any) =
+        actionConverter<DidNavigate>(
+                filter = { it.to == id },
+                converter = { actionProvider() }
+        )
+
 fun ModuleDefinition.convertNavForwardFrom(@IdRes id: Int, actionProvider: () -> Any) =
         actionConverter<DidNavigate.Forward>(
                 filter = { it.from == id },
