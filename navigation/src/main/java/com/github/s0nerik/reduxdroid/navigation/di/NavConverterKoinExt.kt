@@ -5,9 +5,16 @@ import com.github.s0nerik.reduxdroid.core.di.actionConverter
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import org.koin.dsl.context.ModuleDefinition
 
-fun ModuleDefinition.convertNavFrom(@IdRes id: Int, actionProvider: () -> Any) =
+//region Any direction
+fun ModuleDefinition.convertNav(@IdRes to: Int, @IdRes vararg from: Int, actionProvider: () -> Any) =
         actionConverter<DidNavigate>(
-                filter = { it.to == id },
+                filter = { it.to == to && it.from in from },
+                converter = { actionProvider() }
+        )
+
+fun ModuleDefinition.convertNavFrom(@IdRes vararg id: Int, actionProvider: () -> Any) =
+        actionConverter<DidNavigate>(
+                filter = { it.from in id },
                 converter = { actionProvider() }
         )
 
@@ -16,10 +23,18 @@ fun ModuleDefinition.convertNavTo(@IdRes id: Int, actionProvider: () -> Any) =
                 filter = { it.to == id },
                 converter = { actionProvider() }
         )
+//endregion
 
-fun ModuleDefinition.convertNavForwardFrom(@IdRes id: Int, actionProvider: () -> Any) =
+//region Forward
+fun ModuleDefinition.convertNavForward(@IdRes to: Int, @IdRes vararg from: Int, actionProvider: () -> Any) =
         actionConverter<DidNavigate.Forward>(
-                filter = { it.from == id },
+                filter = { it.to == to && it.from in from },
+                converter = { actionProvider() }
+        )
+
+fun ModuleDefinition.convertNavForwardFrom(@IdRes vararg id: Int, actionProvider: () -> Any) =
+        actionConverter<DidNavigate.Forward>(
+                filter = { it.from in id },
                 converter = { actionProvider() }
         )
 
@@ -28,10 +43,18 @@ fun ModuleDefinition.convertNavForwardTo(@IdRes id: Int, actionProvider: () -> A
                 filter = { it.to == id },
                 converter = { actionProvider() }
         )
+//endregion
 
-fun ModuleDefinition.convertNavBackFrom(@IdRes id: Int, actionProvider: () -> Any) =
+//region Back
+fun ModuleDefinition.convertNavBack(@IdRes to: Int, @IdRes vararg from: Int, actionProvider: () -> Any) =
         actionConverter<DidNavigate.Back>(
-                filter = { it.from == id },
+                filter = { it.to == to && it.from in from },
+                converter = { actionProvider() }
+        )
+
+fun ModuleDefinition.convertNavBackFrom(@IdRes vararg id: Int, actionProvider: () -> Any) =
+        actionConverter<DidNavigate.Back>(
+                filter = { it.from in id },
                 converter = { actionProvider() }
         )
 
@@ -40,3 +63,4 @@ fun ModuleDefinition.convertNavBackTo(@IdRes id: Int, actionProvider: () -> Any)
                 filter = { it.to == id },
                 converter = { actionProvider() }
         )
+//endregion
