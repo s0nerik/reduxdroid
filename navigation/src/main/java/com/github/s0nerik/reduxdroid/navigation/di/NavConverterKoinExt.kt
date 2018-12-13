@@ -6,23 +6,20 @@ import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import org.koin.dsl.context.ModuleDefinition
 
 //region Any direction
-fun ModuleDefinition.convertNav(@IdRes to: Int, @IdRes vararg from: Int, actionProvider: () -> Any) =
-        actionConverter<DidNavigate>(
-                filter = { it.to == to && it.from in from },
-                converter = { actionProvider() }
-        )
+fun ModuleDefinition.convertNav(@IdRes to: Int, @IdRes vararg from: Int, actionProvider: () -> Any) {
+        convertNavForward(to, *from, actionProvider = actionProvider)
+        convertNavBack(to, *from, actionProvider = actionProvider)
+}
 
-fun ModuleDefinition.convertNavFrom(@IdRes vararg id: Int, actionProvider: () -> Any) =
-        actionConverter<DidNavigate>(
-                filter = { it.from in id },
-                converter = { actionProvider() }
-        )
+fun ModuleDefinition.convertNavFrom(@IdRes vararg id: Int, actionProvider: () -> Any) {
+        convertNavForwardFrom(*id, actionProvider = actionProvider)
+        convertNavBackFrom(*id, actionProvider = actionProvider)
+}
 
-fun ModuleDefinition.convertNavTo(@IdRes id: Int, actionProvider: () -> Any) =
-        actionConverter<DidNavigate>(
-                filter = { it.to == id },
-                converter = { actionProvider() }
-        )
+fun ModuleDefinition.convertNavTo(@IdRes id: Int, actionProvider: () -> Any) {
+        convertNavForwardTo(id, actionProvider = actionProvider)
+        convertNavBackTo(id, actionProvider = actionProvider)
+}
 //endregion
 
 //region Forward
