@@ -10,7 +10,6 @@ typealias ActionConverter<A1, A2> = (A1) -> A2?
 
 @PublishedApi
 internal data class ActionConverterHolder<A1, A2>(
-        val dropOriginalAction: Boolean,
         val converter: ActionConverter<A1, A2>
 )
 
@@ -37,11 +36,10 @@ internal val ModuleDefinition.actionConverters
  * @see [ModuleDefinition.reducer]
  */
 inline fun <reified A> ModuleDefinition.actionConverter(
-        dropOriginalAction: Boolean = false,
         crossinline filter: (A) -> Boolean = { true },
         crossinline converter: ActionConverter<A, Any>
 ) = addNonUniqueKeyMapEntry(
         propertyName = ACTION_CONVERTERS_KEY,
         itemKey = A::class,
-        itemValue = ActionConverterHolder(dropOriginalAction, _filteredActionConverter(converter, filter))
+        itemValue = ActionConverterHolder(_filteredActionConverter(converter, filter))
 )

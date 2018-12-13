@@ -21,6 +21,11 @@ class ActionConverterMiddlewareTest : KoinTest {
     object Action3
     object Action4
 
+    sealed class A {
+        object A1 : A()
+        object A2 : A()
+    }
+
     private val store: StateStore by inject()
     private val dispatcher: ActionDispatcher by inject()
 
@@ -49,9 +54,21 @@ class ActionConverterMiddlewareTest : KoinTest {
     }
 
     @Test
+    fun `actionConverter doesn't handle inheritance`() {
+        val testMiddleware = startTestKoin {
+            actionConverter<A> { Action1 }
+            actionConverter<A.A1> { Action2 }
+        }
+
+        dispatcher.dispatch(A.A1)
+
+        Assert.assertArrayEquals(arrayOf(A.A1, Action2), testMiddleware.actions().toTypedArray())
+    }
+
+    @Test
     fun `test simple case`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1>(dropOriginalAction = false) { Action2 }
+            actionConverter<Action1> { Action2 }
         }
 
         dispatcher.dispatch(Action1)
@@ -60,47 +77,11 @@ class ActionConverterMiddlewareTest : KoinTest {
     }
 
     @Test
-    fun `test simple case with dropOriginalAction = true`() {
+    fun `multiple actionConverters don't produce original action multiple times`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1>(dropOriginalAction = true) { Action2 }
-        }
-
-        dispatcher.dispatch(Action1)
-
-        Assert.assertArrayEquals(arrayOf(Action2), testMiddleware.actions().toTypedArray())
-    }
-
-    @Test
-    fun `if any ActionConverter for action T has dropOriginalAction = true, action T will be dismissed (1)`() {
-        val testMiddleware = startTestKoin {
-            actionConverter<Action1>(dropOriginalAction = true) { Action2 }
-            actionConverter<Action1>(dropOriginalAction = true) { Action3 }
-        }
-
-        dispatcher.dispatch(Action1)
-
-        Assert.assertArrayEquals(arrayOf(Action2, Action3), testMiddleware.actions().toTypedArray())
-    }
-
-    @Test
-    fun `if any ActionConverter for action T has dropOriginalAction = true, action T will be dismissed (2)`() {
-        val testMiddleware = startTestKoin {
-            actionConverter<Action1>(dropOriginalAction = true) { Action2 }
-            actionConverter<Action1>(dropOriginalAction = true) { Action3 }
-            actionConverter<Action1>(dropOriginalAction = false) { Action4 }
-        }
-
-        dispatcher.dispatch(Action1)
-
-        Assert.assertArrayEquals(arrayOf(Action2, Action3, Action4), testMiddleware.actions().toTypedArray())
-    }
-
-    @Test
-    fun `multiple actionConverter(dropsOriginalAction = false) don't produce original action multiple times`() {
-        val testMiddleware = startTestKoin {
-            actionConverter<Action1>(dropOriginalAction = false) { Action2 }
-            actionConverter<Action1>(dropOriginalAction = false) { Action3 }
-            actionConverter<Action1>(dropOriginalAction = false) { Action4 }
+            actionConverter<Action1> { Action2 }
+            actionConverter<Action1> { Action3 }
+            actionConverter<Action1> { Action4 }
         }
 
         dispatcher.dispatch(Action1)
