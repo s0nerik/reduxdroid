@@ -1,10 +1,11 @@
 package com.github.s0nerik.reduxdroid.navigation.middleware
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
-import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.NavDestination
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
@@ -20,20 +21,18 @@ abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {
 
 internal class NavigationMiddlewareImpl(
         private val ctx: Context
-) : NavigationMiddleware(), androidx.navigation.Navigator.OnNavigatorNavigatedListener, KoinComponent {
+) : NavigationMiddleware(), NavController.OnDestinationChangedListener, KoinComponent {
     private val dispatcher: ActionDispatcher by inject()
 
     private val _navControllers = mutableListOf<WeakReference<NavController>>()
 
-    private var lastDestId: Int = 0
-    private var currDestId: Int = 0
+    private var lastDestinationId: Int = 0
 
     override fun attachNavController(navController: NavController) {
         _navControllers += WeakReference(navController)
 
-        val navigator = navController.navigatorProvider.getNavigator(FragmentNavigator::class.java)
-        navigator.removeOnNavigatorNavigatedListener(this)
-        navigator.addOnNavigatorNavigatedListener(this)
+        navController.removeOnDestinationChangedListener(this)
+        navController.addOnDestinationChangedListener(this)
     }
 
     override fun detachNavController(navController: NavController) {
@@ -62,40 +61,29 @@ internal class NavigationMiddlewareImpl(
         when (action) {
             is Nav.Forward -> error("Can't navigate to ${idName(action.to)}")
             is Nav.Back -> if (action.to != null) {
-                error("Can't navigate back from ${idName(currDestId)} to ${idName(action.to)}")
+                error("Can't navigate back from ${idName(lastDestinationId)} to ${idName(action.to)}")
             } else {
-                error("Can't navigate back from ${idName(currDestId)}")
+                error("Can't navigate back from ${idName(lastDestinationId)}")
             }
         }
     }
 
     private fun idName(@IdRes resId: Int): String {
-        val fullName = try { ctx.resources.getResourceName(resId) } catch (t: Throwable) { null }
+        val fullName = try { "@${ctx.resources.getResourceName(resId)}" } catch (t: Throwable) { null }
         return (fullName ?: "NONE").substringAfterLast(":")
     }
 
-    override fun onNavigatorNavigated(navigator: androidx.navigation.Navigator<*>, destId: Int, backStackEffect: Int) {
-        lastDestId = currDestId
-        currDestId = destId
+    override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
+        val lastDestStr = idName(lastDestinationId)
+        val destStr = idName(destination.id)
 
-        val effect = when (backStackEffect) {
-            androidx.navigation.Navigator.BACK_STACK_DESTINATION_ADDED -> "ADDED"
-            androidx.navigation.Navigator.BACK_STACK_DESTINATION_POPPED -> "POP"
-            androidx.navigation.Navigator.BACK_STACK_UNCHANGED -> "UNCHANGED"
-            else -> "UNKNOWN"
+        Log.d("NavigationMiddleware", "DidNavigate(from: $lastDestStr, to: $destStr)")
+        try {
+            dispatcher.dispatch(DidNavigate(lastDestinationId, destination.id))
+        } catch (t: Throwable) {
+            Log.e("NavigationMiddleware", "Can't dispatch DidNavigate(from: $lastDestStr, to: $destStr). Cause: $t")
         }
 
-        val lastDestStr = idName(lastDestId)
-        val destStr = idName(destId)
-
-        Log.d("NavigationMiddleware", "onNavigatorNavigated: $destStr, backStackEffect: $effect")
-
-        if (effect == "POP") {
-            Log.d("NavigationMiddleware", "DidNavigate.Back(from: $lastDestStr, to: $destStr)")
-            dispatcher.dispatch(DidNavigate.Back(lastDestId, destId))
-        } else if (effect == "ADDED") {
-            Log.d("NavigationMiddleware", "DidNavigate.Forward(from: $lastDestStr, to: $destStr)")
-            dispatcher.dispatch(DidNavigate.Forward(lastDestId, destId))
-        }
+        lastDestinationId = destination.id
     }
 }
