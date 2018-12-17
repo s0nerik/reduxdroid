@@ -17,16 +17,23 @@ import java.lang.ref.WeakReference
 abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {
     abstract fun attachNavController(navController: NavController)
     abstract fun detachNavController(navController: NavController)
+
+    abstract var debug: Boolean
 }
 
 internal class NavigationMiddlewareImpl(
         private val ctx: Context
 ) : NavigationMiddleware(), NavController.OnDestinationChangedListener, KoinComponent {
+    override var debug: Boolean = false
+
     private val dispatcher: ActionDispatcher by inject()
 
     private val _navControllers = mutableListOf<WeakReference<NavController>>()
 
-    private var lastDestinationId: Int = 0
+    private var destinationsMap = mapOf<Int, Int>()
+
+    private val destinationsMapReadable: Map<String, String>
+        get() = destinationsMap.mapKeys { idName(it.key) }.mapValues { idName(it.value) }
 
     override fun attachNavController(navController: NavController) {
         _navControllers += WeakReference(navController)
@@ -51,39 +58,45 @@ internal class NavigationMiddlewareImpl(
         _navControllers.reversed().mapNotNull { it.get() }.forEach { navCtrl ->
             try {
                 when (action) {
-                    is Nav.Forward -> navCtrl.navigate(action.to)
-                    is Nav.Back -> action.to?.let { navCtrl.popBackStack(it, action.inclusive) } ?: navCtrl.popBackStack()
+                    is Nav.Forward -> {
+                        navCtrl.navigate(action.to)
+                        return
+                    }
+                    is Nav.Back -> {
+                        val result = action.to?.let { navCtrl.popBackStack(it, action.inclusive) } ?: navCtrl.popBackStack()
+                        if (result) {
+                            return
+                        }
+                    }
                 }
-                return
             } catch (ignore: Throwable) {}
         }
 
         when (action) {
-            is Nav.Forward -> error("Can't navigate to ${idName(action.to)}")
-            is Nav.Back -> if (action.to != null) {
-                error("Can't navigate back from ${idName(lastDestinationId)} to ${idName(action.to)}")
-            } else {
-                error("Can't navigate back from ${idName(lastDestinationId)}")
-            }
+            is Nav.Forward -> error("Can't navigate to ${idName(action.to)}. Current navigation state: ${destinationsMapReadable}")
+            is Nav.Back -> error("Can't navigate back. Current navigation state: ${destinationsMapReadable}")
         }
     }
 
     private fun idName(@IdRes resId: Int): String {
-        val fullName = try { "@${ctx.resources.getResourceName(resId)}" } catch (t: Throwable) { null }
-        return (fullName ?: "NONE").substringAfterLast(":")
+        val fullName = try { "@${ctx.resources.getResourceName(resId).substringAfterLast(":")}" } catch (t: Throwable) { null }
+        return (fullName ?: "NONE")
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
-        val lastDestStr = idName(lastDestinationId)
-        val destStr = idName(destination.id)
+        destination.parent?.let { graph ->
+            val newDestMap = destinationsMap + (graph.id to destination.id)
+            if (newDestMap[graph.id] != destinationsMap[graph.id]) {
+                val fromId = destinationsMap[graph.id] ?: 0
+                val toId = newDestMap[graph.id] ?: 0
 
-        Log.d("NavigationMiddleware", "DidNavigate(from: $lastDestStr, to: $destStr)")
-        try {
-            dispatcher.dispatch(DidNavigate(lastDestinationId, destination.id))
-        } catch (t: Throwable) {
-            Log.e("NavigationMiddleware", "Can't dispatch DidNavigate(from: $lastDestStr, to: $destStr). Cause: $t")
+                dispatcher.dispatch(DidNavigate(graph.id, fromId, toId, idName(graph.id), idName(fromId), idName(toId)))
+                destinationsMap = newDestMap
+            }
         }
 
-        lastDestinationId = destination.id
+        if (debug) {
+            Log.d("NavigationMiddleware", "onDestinationChanged, destinations: ${destinationsMapReadable}")
+        }
     }
 }

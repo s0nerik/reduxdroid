@@ -8,6 +8,12 @@ sealed class Nav {
 }
 
 data class DidNavigate(
+        @IdRes val graph: Int,
         @IdRes val from: Int,
-        @IdRes val to: Int
-)
+        @IdRes val to: Int,
+        private val graphStr: String = graph.toString(),
+        private val fromStr: String = from.toString(),
+        private val toStr: String = to.toString()
+) {
+    override fun toString() = "DidNavigate(graph: ${graphStr}, from: ${fromStr}, to: ${toStr})"
+}
