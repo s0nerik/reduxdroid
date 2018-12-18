@@ -20,17 +20,13 @@ internal class AppStateSerializerImpl(
         private val ctx: Context,
         private val serializers: Map<KClass<Any>, KSerializer<Any>>
 ) : AppStateSerializer {
-    private val cbor: CBOR
-
-    override var debugMode: Boolean = false
-
-    init {
-        cbor = CBOR().apply {
-            serializers.forEach {
-                install(SimpleModule(it.key, it.value))
-            }
+    private val cbor: CBOR = CBOR().apply {
+        serializers.forEach {
+            install(SimpleModule(it.key, it.value))
         }
     }
+
+    override var debugMode: Boolean = false
 
     override fun save() {
         try {

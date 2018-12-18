@@ -7,7 +7,7 @@ import kotlinx.serialization.internal.StringDescriptor
 @Serializer(Uri::class)
 object UriSerializer : KSerializer<Uri> {
     override val descriptor: SerialDescriptor
-        get() = StringDescriptor
+        get() = StringDescriptor.withName("android.net.Uri")
 
     override fun deserialize(input: Decoder): Uri {
         return Uri.parse(input.decodeString())
