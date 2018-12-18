@@ -1,5 +1,4 @@
 apply from: "../module.gradle"
-apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
