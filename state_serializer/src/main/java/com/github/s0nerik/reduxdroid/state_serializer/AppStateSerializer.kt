@@ -13,6 +13,7 @@ interface AppStateSerializer {
     fun save()
     fun restore()
     var debugMode: Boolean
+    var throwOnError: Boolean
 }
 
 internal class AppStateSerializerImpl(
@@ -27,6 +28,7 @@ internal class AppStateSerializerImpl(
     }
 
     override var debugMode: Boolean = false
+    override var throwOnError: Boolean = false
 
     override fun save() {
         try {
@@ -43,6 +45,9 @@ internal class AppStateSerializerImpl(
         } catch (t: Throwable) {
             if (debugMode) {
                 Log.e("AppStateSerializer", "State serialization error", t)
+            }
+            if (throwOnError) {
+                throw t
             }
         }
     }
@@ -70,12 +75,18 @@ internal class AppStateSerializerImpl(
             if (debugMode) {
                 Log.e("AppStateSerializer", "State deserialization error", t)
             }
+            if (throwOnError) {
+                throw t
+            }
         } finally {
             try {
                 ctx.deleteFile(APP_STATE_FILE_NAME)
             } catch (t: Throwable) {
                 if (debugMode) {
                     Log.e("AppStateSerializer", "Can't delete serialized state file", t)
+                }
+                if (throwOnError) {
+                    throw t
                 }
             }
         }
