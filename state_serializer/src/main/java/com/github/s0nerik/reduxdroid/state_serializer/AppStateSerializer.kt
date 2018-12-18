@@ -74,6 +74,14 @@ internal class AppStateSerializerImpl(
             if (debugMode) {
                 Log.e("AppStateSerializer", "State deserialization error", t)
             }
+        } finally {
+            try {
+                ctx.deleteFile(APP_STATE_FILE_NAME)
+            } catch (t: Throwable) {
+                if (debugMode) {
+                    Log.e("AppStateSerializer", "Can't delete serialized state file", t)
+                }
+            }
         }
     }
 
@@ -82,7 +90,6 @@ internal class AppStateSerializerImpl(
             val state = cbor.load(AppState.serializer(), it.readBytes())
             store.state = state
         }
-        ctx.deleteFile(APP_STATE_FILE_NAME)
     }
 
     companion object {
