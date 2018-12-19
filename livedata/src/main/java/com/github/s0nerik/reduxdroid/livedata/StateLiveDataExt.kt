@@ -2,21 +2,42 @@ package com.github.s0nerik.reduxdroid.livedata
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.MediatorLiveData
 import com.github.s0nerik.reduxdroid.core.state.AppState
 
-@MainThread
-inline fun <reified S : Any> LiveData<AppState>.get() =
-        Transformations.map(this) { it.get<S>() } as LiveData<S>
+@PublishedApi
+internal fun <T> LiveData<AppState>.distinctMediatorLiveData(distinct: Boolean, valueSelector: (AppState) -> T): LiveData<T> {
+    val mediator: MediatorLiveData<T> = MediatorLiveData()
+    var latestValue: T? = null
+    mediator.addSource(this) {
+        val newValue = valueSelector(it)
+        if (!distinct || latestValue != newValue) {
+            mediator.value = newValue
+            latestValue = newValue
+        }
+    }
+    return mediator
+}
 
 @MainThread
-inline fun <reified S : Any, T : Any> LiveData<AppState>.get(crossinline selector: (S) -> T) =
-        Transformations.map(this) { it.get(selector) } as LiveData<T>
+inline fun <reified T : Any> LiveData<AppState>.get(distinct: Boolean = true): LiveData<T> =
+        distinctMediatorLiveData(distinct) { it.get<T>() }
 
 @MainThread
-inline fun <reified S : Any, T : Any> LiveData<AppState>.get(crossinline selector: (S) -> T?, default: T) =
-        Transformations.map(this) { it.get(selector) ?: default } as LiveData<T>
+inline fun <reified S : Any, T : Any> LiveData<AppState>.get(
+        crossinline selector: (S) -> T,
+        distinct: Boolean = true
+): LiveData<T> = distinctMediatorLiveData(distinct) { it.get(selector) }
 
 @MainThread
-inline fun <reified S : Any, T : Any> LiveData<AppState>.getNullable(crossinline selector: (S) -> T?) =
-        Transformations.map(this) { it.get(selector) } as LiveData<T?>
+inline fun <reified S : Any, T : Any> LiveData<AppState>.get(
+        crossinline selector: (S) -> T?,
+        default: T,
+        distinct: Boolean = true
+): LiveData<T> = distinctMediatorLiveData(distinct) { it.get(selector) ?: default }
+
+@MainThread
+inline fun <reified S : Any, T : Any> LiveData<AppState>.getNullable(
+        crossinline selector: (S) -> T?,
+        distinct: Boolean = true
+): LiveData<T?> = distinctMediatorLiveData(distinct) { it.get(selector) }
