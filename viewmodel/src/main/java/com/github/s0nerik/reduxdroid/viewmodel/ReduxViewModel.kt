@@ -25,13 +25,16 @@ abstract class ReduxViewModel(
 
     @MainThread
     fun <T> LiveData<T>.mutable(actionProvider: (T) -> Any): MutableLiveData<T> {
+        var latestValue: T? = null
         val result = object : MediatorLiveData<T>() {
             override fun setValue(value: T) {
-                dispatch(actionProvider(value))
+                if (value != latestValue)
+                    dispatch(actionProvider(value))
             }
 
             fun doSetValue(value: T) {
                 super.setValue(value)
+                latestValue = value
             }
         }
         result.addSource(this) { result.doSetValue(it) }
@@ -40,13 +43,16 @@ abstract class ReduxViewModel(
 
     @MainThread
     fun <T> LiveData<T>.mutableThunk(thunkProvider: (T) -> Thunk): MutableLiveData<T> {
+        var latestValue: T? = null
         val result = object : MediatorLiveData<T>() {
             override fun setValue(value: T) {
-                dispatch(thunkProvider(value))
+                if (value != latestValue)
+                    dispatch(thunkProvider(value))
             }
 
             fun doSetValue(value: T) {
                 super.setValue(value)
+                latestValue = value
             }
         }
         result.addSource(this) { result.doSetValue(it) }
