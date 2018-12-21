@@ -13,7 +13,10 @@ data class AppState @PublishedApi internal constructor(
             if (clazz == AppState::class) {
                 this as S
             } else {
-                state[clazz.jvmName] as S
+                val substate = state[clazz.jvmName] ?: throw IllegalArgumentException(
+                        "${clazz.jvmName} is not present in a state map. Forgot to specify a state inside the module?"
+                )
+                substate as S
             }
 
     inline fun <reified S : Any> get(): S = get(S::class)
