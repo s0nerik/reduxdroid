@@ -20,6 +20,7 @@ class ActionConverterMiddlewareTest : KoinTest {
     object Action2
     object Action3
     object Action4
+    object Action5
 
     sealed class A {
         object A1 : A()
@@ -56,8 +57,8 @@ class ActionConverterMiddlewareTest : KoinTest {
     @Test
     fun `actionConverter doesn't handle inheritance`() {
         val testMiddleware = startTestKoin {
-            actionConverter<A> { Action1 }
-            actionConverter<A.A1> { Action2 }
+            actionConverter<A> { _, _, dispatch -> dispatch(Action1) }
+            actionConverter<A.A1> { _, _, dispatch -> dispatch(Action2) }
         }
 
         dispatcher.dispatch(A.A1)
@@ -68,7 +69,7 @@ class ActionConverterMiddlewareTest : KoinTest {
     @Test
     fun `test simple case`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1> { Action2 }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action2) }
         }
 
         dispatcher.dispatch(Action1)
@@ -79,9 +80,9 @@ class ActionConverterMiddlewareTest : KoinTest {
     @Test
     fun `multiple actionConverters don't produce original action multiple times`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1> { Action2 }
-            actionConverter<Action1> { Action3 }
-            actionConverter<Action1> { Action4 }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action2) }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action3) }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action4) }
         }
 
         dispatcher.dispatch(Action1)
@@ -92,9 +93,9 @@ class ActionConverterMiddlewareTest : KoinTest {
     @Test
     fun `actionConverters can return actions that itself will be converted to another actions`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1> { Action2 }
-            actionConverter<Action2> { Action3 }
-            actionConverter<Action3> { Action4 }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action2) }
+            actionConverter<Action2> { _, _, dispatch -> dispatch(Action3) }
+            actionConverter<Action3> { _, _, dispatch -> dispatch(Action4) }
         }
 
         dispatcher.dispatch(Action1)
@@ -105,14 +106,32 @@ class ActionConverterMiddlewareTest : KoinTest {
     @Test
     fun `actionConverter dispatches converted actions in registration order`() {
         val testMiddleware = startTestKoin {
-            actionConverter<Action1> { Action2 }
-            actionConverter<Action2> { Action3 }
-            actionConverter<Action3> { Action4 }
-            actionConverter<Action1> { Action2 }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action2) }
+            actionConverter<Action2> { _, _, dispatch -> dispatch(Action3) }
+            actionConverter<Action3> { _, _, dispatch -> dispatch(Action4) }
+            actionConverter<Action1> { _, _, dispatch -> dispatch(Action2) }
         }
 
         dispatcher.dispatch(Action1)
 
         Assert.assertArrayEquals(arrayOf(Action1, Action2, Action3, Action4, Action2, Action3, Action4), testMiddleware.actions().toTypedArray())
+    }
+
+    @Test
+    fun `actionConverter can dispatch multiple actions, each actionConverter maintains dispatch orders`() {
+        val testMiddleware = startTestKoin {
+            actionConverter<Action1> { _, _, dispatch ->
+                dispatch(Action2)
+                dispatch(Action3)
+            }
+            actionConverter<Action2> { _, _, dispatch ->
+                dispatch(Action4)
+                dispatch(Action5)
+            }
+        }
+
+        dispatcher.dispatch(Action1)
+
+        Assert.assertArrayEquals(arrayOf(Action1, Action2, Action4, Action5, Action3), testMiddleware.actions().toTypedArray())
     }
 }

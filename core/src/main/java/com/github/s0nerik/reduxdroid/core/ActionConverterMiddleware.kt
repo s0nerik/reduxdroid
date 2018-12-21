@@ -7,30 +7,21 @@ import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 import kotlin.reflect.KClass
 
-private data class ConvertersHolder(
-        val converters: List<ActionConverter<Any, Any>>
-)
-
 internal class ActionConverterMiddleware(
-        converters: Map<KClass<*>, List<ActionConverterHolder<Any, Any>>>
+        converters: Map<KClass<*>, List<ActionConverterHolder<Any>>>
 ) : Middleware<Any, Any>, KoinComponent {
     private val dispatcher: ActionDispatcher by inject()
+    private val store: StateStore by inject()
 
-    private val converterHolders: Map<KClass<*>, ConvertersHolder> = converters.mapValues {
-        ConvertersHolder(
-                converters = it.value.map { it.converter }
-        )
+    private val converters: Map<KClass<*>, List<ActionConverter<Any>>> = converters.mapValues {
+        it.value.map { it.converter }
     }
 
     override fun dispatch(next: (Any) -> Any, action: Any): Any {
         val resultAction = next(action)
 
-        converterHolders[action::class]?.let { holder ->
-            holder.converters.forEach { converter ->
-                converter(action)?.let {
-                    dispatcher.dispatch(it)
-                }
-            }
+        converters[action::class]?.forEach { converter ->
+            converter(action, store.state, dispatcher::dispatch)
         }
 
         return resultAction

@@ -11,19 +11,17 @@ inline fun <reified RequestAction : Any> ModuleDefinition.startForResult(
         crossinline okConverter: (ActivityResult) -> Any,
         noinline canceledConverter: ((ActivityResult) -> Any)? = null
 ) {
-    actionConverter<RequestAction> {
-        StartActivityForResult(intentProvider(it), requestCode)
+    actionConverter<RequestAction> { action, _, dispatch ->
+        dispatch(StartActivityForResult(intentProvider(action), requestCode))
     }
 
-    actionConverter<ActivityResult>(
-            filter = { it.requestCode == requestCode && it.resultCode == Activity.RESULT_OK },
-            converter = { okConverter(it) }
-    )
-
-    if (canceledConverter != null) {
-        actionConverter<ActivityResult>(
-                filter = { it.requestCode == requestCode && it.resultCode == Activity.RESULT_CANCELED },
-                converter = { canceledConverter(it) }
-        )
+    actionConverter<ActivityResult> { action, _, dispatch ->
+        if (action.requestCode == requestCode) {
+            if (action.resultCode == Activity.RESULT_OK) {
+                dispatch(okConverter(action))
+            } else if (canceledConverter != null && action.resultCode == Activity.RESULT_CANCELED) {
+                dispatch(canceledConverter(action))
+            }
+        }
     }
 }

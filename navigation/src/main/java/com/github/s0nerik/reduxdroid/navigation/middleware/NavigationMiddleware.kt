@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.fragment.FragmentNavigator
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
@@ -30,6 +31,7 @@ internal class NavigationMiddlewareImpl(
 
     private val _navControllers = mutableListOf<WeakReference<NavController>>()
 
+    // Holds current graph destination ids in form of [graph id -> destination id]
     private var destinationsMap = mapOf<Int, Int>()
 
     private val destinationsMapReadable: Map<String, String>
@@ -84,6 +86,8 @@ internal class NavigationMiddlewareImpl(
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
+        // val className = (destination as? FragmentNavigator.Destination)?.className
+
         destination.parent?.let { graph ->
             val newDestMap = destinationsMap + (graph.id to destination.id)
             if (newDestMap[graph.id] != destinationsMap[graph.id]) {

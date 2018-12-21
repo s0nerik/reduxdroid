@@ -9,19 +9,17 @@ inline fun <reified RequestAction : Any> ModuleDefinition.requestPermissions(
         crossinline grantedConverter: (RequestPermissionsResult) -> Any,
         noinline deniedConverter: ((RequestPermissionsResult) -> Any)? = null
 ) {
-    actionConverter<RequestAction> {
-        RequestPermissions(permissions, requestCode)
+    actionConverter<RequestAction> { _, _, dispatch ->
+        dispatch(RequestPermissions(permissions, requestCode))
     }
 
-    actionConverter<RequestPermissionsResult>(
-            filter = { it.requestCode == requestCode && it.allGranted },
-            converter = grantedConverter
-    )
-
-    if (deniedConverter != null) {
-        actionConverter<RequestPermissionsResult>(
-                filter = { it.requestCode == requestCode && !it.allGranted },
-                converter = deniedConverter
-        )
+    actionConverter<RequestPermissionsResult> { action, _, dispatch ->
+        if (action.requestCode == requestCode) {
+            if (action.allGranted) {
+                dispatch(grantedConverter(action))
+            } else if (deniedConverter != null) {
+                dispatch(deniedConverter(action))
+            }
+        }
     }
 }
