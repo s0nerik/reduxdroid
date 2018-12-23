@@ -1,6 +1,9 @@
 package com.github.s0nerik.reduxdroid.navigation
 
+import android.os.Bundle
 import androidx.annotation.IdRes
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
 
 sealed class Nav {
     /**
@@ -8,7 +11,12 @@ sealed class Nav {
      *
      * **CAUTION**: This action is intended to be instantiated inside an `actionConverter` definition.
      */
-    data class Forward(@IdRes val to: Int) : Nav()
+    data class Forward(
+            @IdRes val to: Int,
+            val args: Bundle? = null,
+            val navOptions: NavOptions? = null,
+            val navigatorExtras: Navigator.Extras? = null
+    ) : Nav()
 
     /**
      * Dispatching this action will result in back navigation (as if the "Back" button was pressed).

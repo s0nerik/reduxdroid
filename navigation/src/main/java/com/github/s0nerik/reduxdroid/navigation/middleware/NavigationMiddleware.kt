@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.fragment.FragmentNavigator
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
@@ -61,7 +60,7 @@ internal class NavigationMiddlewareImpl(
             try {
                 when (action) {
                     is Nav.Forward -> {
-                        navCtrl.navigate(action.to)
+                        navCtrl.navigate(action.to, action.args, action.navOptions, action.navigatorExtras)
                         return
                     }
                     is Nav.Back -> {
