@@ -15,7 +15,7 @@ sealed class Nav {
      *
      * *CAUTION*: This action is intended to be instantiated inside an `actionConverter` definition.
      */
-    data class Back(@IdRes val to: Int?, val inclusive: Boolean) : Nav()
+    data class Back(@IdRes val to: Int? = null, val inclusive: Boolean = false) : Nav()
 }
 
 data class DidNavigate internal constructor(
