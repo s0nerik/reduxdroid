@@ -8,10 +8,20 @@ import com.github.s0nerik.reduxdroid.core.state.AppState
 @PublishedApi
 internal fun <T> LiveData<AppState>.distinctMediatorLiveData(distinct: Boolean, default: T? = null, valueSelector: (AppState) -> T): LiveData<T> {
     val mediator: MediatorLiveData<T> = MediatorLiveData()
-    var latestValue: T? = default
+    var latestValue: T? = null
+    var hasDefaultValue = false
+    if (default != null) {
+        mediator.value = default
+        latestValue = default
+        hasDefaultValue = true
+    }
     mediator.addSource(this) {
         val newValue = valueSelector(it)
-        if (!distinct || latestValue != newValue) {
+        if (!hasDefaultValue) {
+            mediator.value = newValue
+            latestValue = newValue
+            hasDefaultValue = true
+        } else if (!distinct || latestValue != newValue) {
             mediator.value = newValue
             latestValue = newValue
         }
