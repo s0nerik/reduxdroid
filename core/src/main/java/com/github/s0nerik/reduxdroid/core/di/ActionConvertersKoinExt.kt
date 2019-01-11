@@ -1,6 +1,6 @@
 package com.github.s0nerik.reduxdroid.core.di
 
-import com.github.s0nerik.reduxdroid.core.ThunkDispatcher
+import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.state.AppState
 import org.koin.dsl.context.ModuleDefinition
 import kotlin.reflect.KClass
@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 @PublishedApi
 internal val ACTION_CONVERTERS_KEY = "_actionConverters"
 
-typealias ActionConverter<A> = (action: A, state: AppState, dispatch: ThunkDispatcher) -> Unit
+typealias ActionConverter<A> = (action: A, state: AppState, dispatch: ActionDispatcher) -> Unit
 
 @PublishedApi
 internal data class ActionConverterHolder<A>(

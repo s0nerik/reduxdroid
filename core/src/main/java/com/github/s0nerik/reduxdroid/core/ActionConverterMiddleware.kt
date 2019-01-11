@@ -21,7 +21,7 @@ internal class ActionConverterMiddleware(
         val resultAction = next(action)
 
         converters[action::class]?.forEach { converter ->
-            converter(action, store.state, dispatcher::dispatch)
+            converter(action, store.state, dispatcher)
         }
 
         return resultAction
