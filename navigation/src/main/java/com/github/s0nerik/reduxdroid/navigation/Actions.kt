@@ -26,7 +26,7 @@ sealed class Nav {
     data class Back(@IdRes val to: Int? = null, val inclusive: Boolean = false) : Nav()
 }
 
-data class DidNavigate internal constructor(
+data class DidNavigate(
         @IdRes val graph: Int,
         @IdRes val from: Int,
         @IdRes val to: Int,
