@@ -1,5 +1,6 @@
 package com.github.s0nerik.reduxdroid.navigation.middleware
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +19,8 @@ abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {
     abstract fun attachNavController(navController: NavController)
     abstract fun detachNavController(navController: NavController)
 
+    abstract fun attachActivity(activity: Activity)
+
     abstract var debug: Boolean
 }
 
@@ -30,11 +33,17 @@ internal class NavigationMiddlewareImpl(
 
     private val _navControllers = mutableListOf<WeakReference<NavController>>()
 
+    private var activity: WeakReference<Activity> = WeakReference<Activity>(null)
+
     // Holds current graph destination ids in form of [graph id -> destination id]
     private var destinationsMap = mapOf<Int, Int>()
 
     private val destinationsMapReadable: Map<String, String>
         get() = destinationsMap.mapKeys { idName(it.key) }.mapValues { idName(it.value) }
+
+    override fun attachActivity(activity: Activity) {
+        this.activity = WeakReference(activity)
+    }
 
     override fun attachNavController(navController: NavController) {
         _navControllers += WeakReference(navController)
@@ -64,8 +73,8 @@ internal class NavigationMiddlewareImpl(
                         return
                     }
                     is Nav.Back -> {
-                        val result = action.to?.let { navCtrl.popBackStack(it, action.inclusive) } ?: navCtrl.popBackStack()
-                        if (result) {
+                        val popped = action.to?.let { navCtrl.popBackStack(it, action.inclusive) } ?: navCtrl.popBackStack()
+                        if (popped) {
                             return
                         }
                     }
@@ -75,7 +84,7 @@ internal class NavigationMiddlewareImpl(
 
         when (action) {
             is Nav.Forward -> error("Can't navigate to ${idName(action.to)}. Current navigation state: ${destinationsMapReadable}")
-            is Nav.Back -> error("Can't navigate back. Current navigation state: ${destinationsMapReadable}")
+            is Nav.Back -> activity.get()?.finish()
         }
     }
 
