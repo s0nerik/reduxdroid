@@ -10,7 +10,10 @@ import org.koin.dsl.module.module
 import org.koin.dsl.path.Path
 
 abstract class AppModule(
-        private val definition: ModuleDefinition.() -> Unit
+        definition: ModuleDefinition.() -> Unit,
+        path: String = Path.ROOT,
+        createOnStart: Boolean = false,
+        override: Boolean = false
 ) : ContentProvider() {
     companion object {
         private val modules = mutableListOf<Module>()
@@ -24,7 +27,7 @@ abstract class AppModule(
         private set
 
     init {
-        module = module(Path.ROOT, false, false, definition)
+        module = module(path = path, createOnStart = createOnStart, override = override, definition = definition)
     }
 
     override fun onCreate(): Boolean {
