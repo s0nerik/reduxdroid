@@ -11,27 +11,41 @@ import org.koin.dsl.path.Path
 
 abstract class AppModule(
         definition: ModuleDefinition.() -> Unit,
+        position: Position = Position.MIDDLE,
         path: String = Path.ROOT,
         createOnStart: Boolean = false,
         override: Boolean = false
 ) : ContentProvider() {
     companion object {
-        private val modules = mutableListOf<Module>()
+        private val moduleEntries = mutableListOf<ModuleEntry>()
 
         val registeredModules: List<Module>
-            get() = modules
+            get() = moduleEntries.sortedBy { it.position }.map { it.module }
     }
 
-    var module: Module
-        get
-        private set
+    internal data class ModuleEntry(
+            val module: Module,
+            val position: Position
+    )
+
+    enum class Position {
+        START, MIDDLE, END
+    }
+
+    internal var moduleEntry: ModuleEntry
+
+    val module: Module
+        get() = moduleEntry.module
 
     init {
-        module = module(path = path, createOnStart = createOnStart, override = override, definition = definition)
+        moduleEntry = ModuleEntry(
+                position = position,
+                module = module(path = path, createOnStart = createOnStart, override = override, definition = definition)
+        )
     }
 
     override fun onCreate(): Boolean {
-        modules += module
+        moduleEntries += moduleEntry
         return true
     }
 
