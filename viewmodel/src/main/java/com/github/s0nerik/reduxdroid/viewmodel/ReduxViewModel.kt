@@ -16,8 +16,9 @@ abstract class ReduxViewModel(
         private val dispatcher: ActionDispatcher
 ) : ViewModel(), ActionDispatcher by dispatcher {
 
+    @Suppress("Annotator")
     @get:MainThread
-    protected val state: LiveData<AppState> = LiveDataAdapter.liveData(store)
+    protected val state: LiveData<AppState> = LiveDataAdapter.liveData(store.store)
 
     @get:MainThread
     protected val currentState: AppState

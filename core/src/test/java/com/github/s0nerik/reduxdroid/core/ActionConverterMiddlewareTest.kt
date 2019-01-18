@@ -9,6 +9,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Test
 import org.koin.dsl.context.ModuleDefinition
+import org.koin.dsl.module.Module
 import org.koin.dsl.module.module
 import org.koin.standalone.StandAloneContext.startKoin
 import org.koin.standalone.StandAloneContext.stopKoin
@@ -37,7 +38,7 @@ class ActionConverterMiddlewareTest : KoinTest {
                 Module().module,
                 module(definition = testModuleDefinition),
                 module {
-                    testMiddleware = TestMiddleware<AppState, Any, Any>(store)
+                    testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
                     middlewares {
                         listOf(
                                 middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }

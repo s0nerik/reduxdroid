@@ -34,7 +34,7 @@ fun ModuleDefinition.actionDispatcher(
 
     middlewares += extraMiddlewares
 
-    val dispatcher = Dispatcher.forStore(store, _combinedReducer())
+    val dispatcher = Dispatcher.forStore(store.store, _combinedReducer())
             .chain(middlewares.map { ReduxMiddleware(it) }.reversed())
 
     return ActionDispatcherImpl(dispatcher)

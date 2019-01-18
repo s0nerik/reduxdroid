@@ -6,7 +6,8 @@ import com.github.s0nerik.reduxdroid.core.state.AppState
 import me.tatarka.redux.middleware.TestMiddleware
 
 class TestMiddleware(store: StateStore) : Middleware<Any, Any> {
-    private val testMiddleware = TestMiddleware<AppState, Any, Any>(store)
+    @Suppress("Annotator")
+    private val testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
 
     val actions: List<Any>
         get() = testMiddleware.actions()
