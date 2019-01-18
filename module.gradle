@@ -1,16 +1,45 @@
-apply from: "../module_base.gradle"
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'kotlinx-serialization'
+
+group = 'com.github.s0nerik'
 
 android {
-    sourceSets {
-        main.kotlin.srcDirs += '../core/src/main/java'
+    compileSdkVersion compile_sdk
+
+    defaultConfig {
+        minSdkVersion min_sdk
+        targetSdkVersion target_sdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 }
 
-dependencies {
-    implementation project(":core")
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+}
 
-    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
+task javadocsJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 
-    implementation "me.tatarka.redux:redux-core:$redux_version"
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocsJar
 }

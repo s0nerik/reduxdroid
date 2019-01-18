@@ -9,7 +9,7 @@ import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.StateStore
 import com.github.s0nerik.reduxdroid.core.Thunk
 import com.github.s0nerik.reduxdroid.core.state.AppState
-import me.tatarka.redux.android.lifecycle.LiveDataAdapter
+import com.github.s0nerik.reduxdroid.livedata.LiveDataAdapter
 
 abstract class ReduxViewModel(
         private val store: StateStore,
@@ -18,7 +18,7 @@ abstract class ReduxViewModel(
 
     @Suppress("Annotator")
     @get:MainThread
-    protected val state: LiveData<AppState> = LiveDataAdapter.liveData(store.store)
+    protected val state: LiveData<AppState> = LiveDataAdapter.liveData(store)
 
     @get:MainThread
     protected val currentState: AppState

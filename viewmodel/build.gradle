@@ -2,7 +2,7 @@ apply from: "../module.gradle"
 
 dependencies {
     implementation project(":core")
-    implementation "me.tatarka.redux:redux-android-lifecycle:$redux_version"
+    implementation project(":livedata")
     implementation "androidx.lifecycle:lifecycle-viewmodel:$androidx_lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata:$androidx_lifecycle_version"
 
