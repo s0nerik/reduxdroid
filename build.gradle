@@ -16,7 +16,8 @@ buildscript {
         androidx_lifecycle_version = '2.0.0'
 
         deps = [
-                "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+                "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version",
+                "me.tatarka.redux:redux-core:$redux_version"
         ]
 
         testDeps = [
