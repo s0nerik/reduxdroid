@@ -4,8 +4,8 @@ import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.di.AppModule
 import com.github.s0nerik.reduxdroid.core.middleware.Middleware
 import io.github.classgraph.ClassGraph
-import org.koin.dsl.module.Module
-import org.koin.dsl.module.module
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 /**
  * Finds and instantiates all AppModules in project.

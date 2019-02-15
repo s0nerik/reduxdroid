@@ -3,9 +3,9 @@ package com.github.s0nerik.reduxdroid.activity_result
 import android.app.Activity
 import android.content.Intent
 import com.github.s0nerik.reduxdroid.core.di.actionConverter
-import org.koin.dsl.context.ModuleDefinition
+import org.koin.core.module.Module
 
-inline fun <reified RequestAction : Any> ModuleDefinition.startForResult(
+inline fun <reified RequestAction : Any> Module.startForResult(
         requestCode: Int,
         crossinline intentProvider: (RequestAction) -> Intent,
         crossinline okConverter: (ActivityResult) -> Any,

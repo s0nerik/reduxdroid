@@ -3,11 +3,12 @@ package com.github.s0nerik.reduxdroid.core
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.koin.standalone.StandAloneContext.startKoin
-import org.koin.standalone.StandAloneContext.stopKoin
-import org.koin.standalone.inject
+import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
-import org.koin.test.checkModules
+import org.koin.test.check.checkModules
+import org.koin.test.inject
 
 class ActionDispatcherTest : KoinTest {
     private val actionDispatcher: ActionDispatcher by inject()
@@ -17,9 +18,11 @@ class ActionDispatcherTest : KoinTest {
                 Module().module
         )
 
+    lateinit var koinApp: KoinApplication
+
     @Before
     fun before() {
-        startKoin(modules)
+        koinApp = startKoin { modules(modules) }
     }
 
     @After
@@ -29,7 +32,7 @@ class ActionDispatcherTest : KoinTest {
 
     @Test
     fun `check DI hierarchy`() {
-        checkModules(modules)
+        koinApp.checkModules()
     }
 
     @Test

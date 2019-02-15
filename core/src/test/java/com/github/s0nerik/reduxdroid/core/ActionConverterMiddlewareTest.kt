@@ -8,13 +8,12 @@ import me.tatarka.redux.middleware.TestMiddleware
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
-import org.koin.dsl.context.ModuleDefinition
-import org.koin.dsl.module.Module
-import org.koin.dsl.module.module
-import org.koin.standalone.StandAloneContext.startKoin
-import org.koin.standalone.StandAloneContext.stopKoin
-import org.koin.standalone.inject
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.ModuleDeclaration
+import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.koin.test.inject
 
 class ActionConverterMiddlewareTest : KoinTest {
     object Action1
@@ -31,21 +30,23 @@ class ActionConverterMiddlewareTest : KoinTest {
     private val store: StateStore by inject()
     private val dispatcher: ActionDispatcher by inject()
 
-    private fun startTestKoin(testModuleDefinition: ModuleDefinition.() -> Unit): TestMiddleware<AppState, Any, Any> {
+    private fun startTestKoin(testModuleDefinition: ModuleDeclaration): TestMiddleware<AppState, Any, Any> {
         lateinit var testMiddleware: TestMiddleware<AppState, Any, Any>
 
-        startKoin(listOf(
-                Module().module,
-                module(definition = testModuleDefinition),
-                module {
-                    testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
-                    middlewares {
-                        listOf(
-                                middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }
-                        )
+        startKoin {
+            modules(
+                    Module().module,
+                    module(moduleDeclaration = testModuleDefinition),
+                    module {
+                        testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
+                        middlewares {
+                            listOf(
+                                    middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }
+                            )
+                        }
                     }
-                }
-        ))
+            )
+        }
 
         return testMiddleware
     }

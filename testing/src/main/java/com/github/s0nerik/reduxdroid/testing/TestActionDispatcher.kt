@@ -3,9 +3,9 @@ package com.github.s0nerik.reduxdroid.testing
 import com.github.s0nerik.reduxdroid.core.StateStore
 import com.github.s0nerik.reduxdroid.core.di.actionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.Middleware
-import org.koin.dsl.context.ModuleDefinition
+import org.koin.core.definition.DefinitionContext
 
-fun ModuleDefinition.testActionDispatcher(
+fun DefinitionContext.testActionDispatcher(
         store: StateStore,
         testMiddleware: TestMiddleware,
         withActionConverter: Boolean = true,
