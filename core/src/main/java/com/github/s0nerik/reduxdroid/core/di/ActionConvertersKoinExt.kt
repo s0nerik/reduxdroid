@@ -25,3 +25,12 @@ inline fun <reified A> ModuleDefinition.actionConverter(
         itemKey = A::class,
         itemValue = ActionConverterHolder(converter)
 )
+
+fun <A : Any> ModuleDefinition.actionConverter(
+        actionClass: KClass<A>,
+        converter: ActionConverter<A>
+) = addNonUniqueKeyMapEntry(
+        propertyName = ACTION_CONVERTERS_KEY,
+        itemKey = actionClass,
+        itemValue = ActionConverterHolder(converter)
+)
