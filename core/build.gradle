@@ -15,5 +15,6 @@ dependencies {
 
     implementation deps
     testImplementation testDeps
+    testImplementation project(":testing")
     androidTestImplementation androidTestDeps
 }
