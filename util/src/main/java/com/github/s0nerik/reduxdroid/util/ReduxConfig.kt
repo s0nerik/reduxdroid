@@ -21,11 +21,15 @@ object ReduxConfig {
             error(duplicateKeyError)
 
         map[key] = value
+
+        configs[configKey] = map
     }
 
     fun <K, V> addNonUniqueKeyMapEntry(configKey: String, key: K, value: V) {
         val map = get(configKey) ?: mutableMapOf<K, MutableList<V>>()
         map.getOrPut(key) { mutableListOf() } += value
+
+        configs[configKey] = map
     }
 
     fun <K, V> getUniqueKeyMap(configKey: String) = get<Map<K, V>>(configKey) ?: emptyMap()
