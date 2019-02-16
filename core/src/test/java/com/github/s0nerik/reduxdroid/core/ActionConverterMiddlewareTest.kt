@@ -30,8 +30,6 @@ class ActionConverterMiddlewareTest : KoinTest {
     private val dispatcher: ActionDispatcher by inject()
     private val testMiddleware: TestMiddleware by inject()
 
-    private val redCfg = ReduxConfig.configs
-
     @Before
     fun setup() {
         startKoin {
