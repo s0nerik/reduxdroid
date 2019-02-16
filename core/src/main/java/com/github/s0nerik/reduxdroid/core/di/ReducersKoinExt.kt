@@ -1,11 +1,18 @@
 package com.github.s0nerik.reduxdroid.core.di
 
-import com.github.s0nerik.reduxdroid.core.ReduxConfig
 import com.github.s0nerik.reduxdroid.core.state.AppState
+import com.github.s0nerik.reduxdroid.util.ReduxConfig
 import me.tatarka.redux.Reducer
 import me.tatarka.redux.Reducers
 import org.koin.core.definition.DefinitionContext
 import org.koin.core.module.Module
+import kotlin.reflect.KClass
+
+@PublishedApi
+internal const val ACTION_TYPE_REDUCERS = "ACTION_TYPE_REDUCERS"
+
+@PublishedApi
+internal const val FILTERED_REDUCERS = "FILTERED_REDUCERS"
 
 @PublishedApi
 internal inline fun <reified A : Any, reified S : Any> _appStateReducer(
@@ -32,7 +39,7 @@ inline fun <reified A : Any, reified S : Any> Module.reducer(
         crossinline reducer: (A, S) -> S,
         crossinline filter: (A) -> Boolean
 ) = ReduxConfig.addNonUniqueKeyMapEntry(
-        map = ReduxConfig.filteredReducers,
+        configKey = FILTERED_REDUCERS,
         key = A::class,
         value = _filteredReducer(filter, reducer) as (Any, AppState) -> AppState
 )
@@ -46,21 +53,21 @@ inline fun <reified A : Any, reified S : Any> Module.reducer(
 inline fun <reified A : Any, reified S : Any> Module.reducer(
         crossinline reducer: (A, S) -> S
 ) = ReduxConfig.addUniqueKeyMapEntry(
-        map = ReduxConfig.actionTypeReducers,
+        configKey = ACTION_TYPE_REDUCERS,
         key = A::class,
         value = _appStateReducer(reducer) as (Any, AppState) -> AppState,
         duplicateKeyError = "You can't attach multiple action type bound reducers for the same action. Action type: ${A::class}"
 )
 
 internal fun DefinitionContext._combinedReducer(): Reducer<Any, AppState> {
-    val actionTypeReducers = ReduxConfig.actionTypeReducers
+    val actionTypeReducers = ReduxConfig.getUniqueKeyMap<KClass<*>, (Any, AppState) -> AppState>(ACTION_TYPE_REDUCERS)
 
     var combinedActionTypeReducer = Reducers.matchClass<Any, AppState>()
     actionTypeReducers.forEach { entry ->
         combinedActionTypeReducer = combinedActionTypeReducer.`when`(entry.key.java, entry.value)
     }
 
-    val filteredActionReducers = ReduxConfig.filteredReducers
+    val filteredActionReducers = ReduxConfig.getNonUniqueKeyMap<KClass<*>, (Any, AppState) -> AppState>(FILTERED_REDUCERS)
 
     var combinedFilteredActionReducer = Reducers.matchClass<Any, AppState>()
     filteredActionReducers.forEach { entry ->

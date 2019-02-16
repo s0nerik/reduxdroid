@@ -1,17 +1,20 @@
 package com.github.s0nerik.reduxdroid.state_serializer.di
 
+import com.github.s0nerik.reduxdroid.util.ReduxConfig
 import kotlinx.serialization.KSerializer
-import org.koin.core.definition.DefinitionContext
+import org.koin.core.module.Module
 import kotlin.reflect.KClass
 
 @PublishedApi
-internal val STATE_SERIALIZERS_KEY = "_stateSerializers"
+internal const val STATE_SERIALIZERS = "STATE_SERIALIZERS"
 
-inline fun <reified T : Any, S : KSerializer<T>> DefinitionContext.stateSerializer(serializer: S) {
-    val items = koin.getProperty<MutableMap<KClass<*>, KSerializer<*>>>(STATE_SERIALIZERS_KEY) ?: mutableMapOf()
-    items[T::class] = serializer
-    koin.setProperty(STATE_SERIALIZERS_KEY, items)
-}
+internal val stateSerializers
+    get() = ReduxConfig.getUniqueKeyMap<KClass<Any>, KSerializer<Any>>(STATE_SERIALIZERS)
 
-internal fun DefinitionContext.stateSerializers(): Map<KClass<Any>, KSerializer<Any>> =
-        koin.getProperty(STATE_SERIALIZERS_KEY) ?: mapOf()
+inline fun <reified T : Any, S : KSerializer<T>> Module.stateSerializer(serializer: S) =
+        ReduxConfig.addUniqueKeyMapEntry(
+                configKey = STATE_SERIALIZERS,
+                key = T::class,
+                value = serializer,
+                duplicateKeyError = "Duplicate serializer for ${T::class} is provided"
+        )

@@ -4,10 +4,12 @@ import com.github.s0nerik.reduxdroid.core.di.actionConverter
 import com.github.s0nerik.reduxdroid.core.di.middlewares
 import com.github.s0nerik.reduxdroid.core.middleware.middleware
 import com.github.s0nerik.reduxdroid.core.state.AppState
+import com.github.s0nerik.reduxdroid.util.ReduxConfig
 import me.tatarka.redux.middleware.TestMiddleware
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.ModuleDeclaration
@@ -36,17 +38,18 @@ class ActionConverterMiddlewareTest : KoinTest {
         startKoin {
             modules(
                     Module().module,
-                    module(moduleDeclaration = testModuleDefinition),
-                    module {
-                        testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
-                        middlewares {
-                            listOf(
-                                    middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }
-                            )
-                        }
-                    }
+                    module(moduleDeclaration = testModuleDefinition)
             )
         }
+
+        loadKoinModules(module {
+            testMiddleware = TestMiddleware<AppState, Any, Any>(store.store)
+            middlewares {
+                listOf(
+                        middleware<Any, Any> { next, action -> testMiddleware.dispatch(next, action) }
+                )
+            }
+        })
 
         return testMiddleware
     }
@@ -54,6 +57,7 @@ class ActionConverterMiddlewareTest : KoinTest {
     @After
     fun teardown() {
         stopKoin()
+        ReduxConfig.clear()
     }
 
     @Test

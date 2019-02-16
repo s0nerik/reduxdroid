@@ -1,12 +1,10 @@
 package com.github.s0nerik.reduxdroid.core.di
 
 import com.github.s0nerik.reduxdroid.core.*
-import com.github.s0nerik.reduxdroid.core.ReduxConfig.actionConverters
 import com.github.s0nerik.reduxdroid.core.middleware.Middleware
 import com.github.s0nerik.reduxdroid.core.middleware.ReduxMiddleware
 import me.tatarka.redux.Dispatcher
 import org.koin.core.definition.DefinitionContext
-import kotlin.reflect.KClass
 
 /**
  * Provides ActionDispatcher with such options:
@@ -21,7 +19,7 @@ fun DefinitionContext.actionDispatcher(
         applyAppMiddlewares: Boolean = true,
         extraMiddlewares: List<Middleware<Any, Any>> = emptyList()
 ): ActionDispatcher {
-    val actionConverterMiddleware = ActionConverterMiddleware(ReduxConfig.actionConverters)
+    val actionConverterMiddleware = ActionConverterMiddleware(actionConverters)
 
     val middlewares = mutableListOf<Middleware<Any, Any>>()
 
@@ -29,7 +27,7 @@ fun DefinitionContext.actionDispatcher(
         middlewares += actionConverterMiddleware
 
     if (applyAppMiddlewares)
-        middlewares += appMiddlewares
+        middlewares += appMiddlewaresProvider()
 
     middlewares += extraMiddlewares
 
