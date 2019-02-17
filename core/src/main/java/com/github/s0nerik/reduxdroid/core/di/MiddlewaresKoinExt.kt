@@ -11,11 +11,11 @@ internal const val MIDDLEWARES_KEY = "MIDDLEWARES_KEY"
 /**
  * Registers a list of custom middlewares to be used in the app. In logical order.
  */
-fun Module.middlewares(middlewaresProvider: () -> List<Middleware<*, *>>) = ReduxConfig.setOnce(
+fun Module.middlewares(middlewaresProvider: DefinitionContext.() -> List<Middleware<*, *>>) = ReduxConfig.setOnce(
         configKey = MIDDLEWARES_KEY,
         value = middlewaresProvider,
         duplicateError = "Middlewares can only be registered once. Consider placing middleware registration logic into a main application module."
 )
 
-internal val DefinitionContext.appMiddlewaresProvider: () -> List<Middleware<Any, Any>>
-    get() = ReduxConfig.get<() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY) ?: { emptyList() }
+internal val DefinitionContext.appMiddlewaresProvider: DefinitionContext.() -> List<Middleware<Any, Any>>
+    get() = ReduxConfig.get<DefinitionContext.() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY) ?: { emptyList() }
