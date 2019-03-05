@@ -2,6 +2,7 @@ apply from: "../module.gradle"
 
 dependencies {
     implementation project(":core")
+    implementation project(":util")
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
 
     implementation deps

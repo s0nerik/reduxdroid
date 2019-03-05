@@ -1,21 +1,21 @@
 package com.github.s0nerik.reduxdroid.core.di
 
 import com.github.s0nerik.reduxdroid.core.middleware.Middleware
-import com.github.s0nerik.reduxdroid.core.middleware.ReduxMiddleware
-import org.koin.dsl.context.ModuleDefinition
+import com.github.s0nerik.reduxdroid.util.ReduxConfig
+import org.koin.core.definition.DefinitionContext
+import org.koin.core.module.Module
 
 @PublishedApi
-internal val MIDDLEWARES_KEY = "MIDDLEWARES_KEY"
+internal const val MIDDLEWARES_KEY = "MIDDLEWARES_KEY"
 
 /**
  * Registers a list of custom middlewares to be used in the app. In logical order.
  */
-fun ModuleDefinition.middlewares(middlewaresProvider: () -> List<Middleware<*, *>>) {
-    if (koinContext.getProperty<Any?>(MIDDLEWARES_KEY, null) != null) {
-        error("Middlewares can only be registered once. Consider placing middleware registration logic into a main application module.")
-    }
-    koinContext.setProperty(MIDDLEWARES_KEY, middlewaresProvider)
-}
+fun Module.middlewares(middlewaresProvider: DefinitionContext.() -> List<Middleware<*, *>>) = ReduxConfig.setOnce(
+        configKey = MIDDLEWARES_KEY,
+        value = middlewaresProvider,
+        duplicateError = "Middlewares can only be registered once. Consider placing middleware registration logic into a main application module."
+)
 
-internal val ModuleDefinition.appMiddlewares: List<Middleware<Any, Any>>
-    get() = koinContext.getProperty<() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY, { emptyList() })()
+internal val DefinitionContext.appMiddlewaresProvider: DefinitionContext.() -> List<Middleware<Any, Any>>
+    get() = ReduxConfig.get<DefinitionContext.() -> List<Middleware<Any, Any>>>(MIDDLEWARES_KEY) ?: { emptyList() }

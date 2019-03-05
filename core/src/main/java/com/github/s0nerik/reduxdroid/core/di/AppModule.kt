@@ -4,15 +4,12 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
-import org.koin.dsl.context.ModuleDefinition
-import org.koin.dsl.module.Module
-import org.koin.dsl.module.module
-import org.koin.dsl.path.Path
+import org.koin.core.module.Module
+import org.koin.dsl.module
 
 abstract class AppModule(
-        definition: ModuleDefinition.() -> Unit,
+        definition: Module.() -> Unit,
         position: Position = Position.MIDDLE,
-        path: String = Path.ROOT,
         createOnStart: Boolean = false,
         override: Boolean = false
 ) : ContentProvider() {
@@ -40,7 +37,7 @@ abstract class AppModule(
     init {
         moduleEntry = ModuleEntry(
                 position = position,
-                module = module(path = path, createOnStart = createOnStart, override = override, definition = definition)
+                module = module(createdAtStart = createOnStart, override = override, moduleDeclaration = definition)
         )
     }
 

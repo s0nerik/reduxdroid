@@ -3,8 +3,8 @@ package com.github.s0nerik.reduxdroid.core
 import com.github.s0nerik.reduxdroid.core.di.ActionConverter
 import com.github.s0nerik.reduxdroid.core.di.ActionConverterHolder
 import com.github.s0nerik.reduxdroid.core.middleware.Middleware
-import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import kotlin.reflect.KClass
 
 internal class ActionConverterMiddleware(

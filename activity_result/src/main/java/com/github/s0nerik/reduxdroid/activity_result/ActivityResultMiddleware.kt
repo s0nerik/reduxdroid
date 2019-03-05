@@ -6,8 +6,8 @@ import android.util.Log
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.util.weak
-import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
 /**
  * This action is used to start activity for result.

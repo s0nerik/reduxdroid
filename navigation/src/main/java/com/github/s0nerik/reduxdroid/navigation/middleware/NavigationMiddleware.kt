@@ -11,8 +11,8 @@ import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import com.github.s0nerik.reduxdroid.navigation.Nav
-import org.koin.standalone.KoinComponent
-import org.koin.standalone.inject
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import java.lang.ref.WeakReference
 
 abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {

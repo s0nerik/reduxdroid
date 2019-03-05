@@ -1,9 +1,9 @@
 package com.github.s0nerik.reduxdroid.permissions
 
 import com.github.s0nerik.reduxdroid.core.di.actionConverter
-import org.koin.dsl.context.ModuleDefinition
+import org.koin.core.module.Module
 
-inline fun <reified RequestAction : Any> ModuleDefinition.requestPermissions(
+inline fun <reified RequestAction : Any> Module.requestPermissions(
         requestCode: Int,
         permissions: List<String>,
         crossinline grantedConverter: (RequestPermissionsResult) -> Any,
