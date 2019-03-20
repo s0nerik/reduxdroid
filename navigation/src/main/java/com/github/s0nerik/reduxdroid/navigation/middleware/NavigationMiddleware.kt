@@ -5,15 +5,23 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.github.s0nerik.reduxdroid.core.ActionDispatcher
 import com.github.s0nerik.reduxdroid.core.middleware.TypedMiddleware
 import com.github.s0nerik.reduxdroid.navigation.DidNavigate
 import com.github.s0nerik.reduxdroid.navigation.Nav
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.channels.Channel
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.lang.ref.WeakReference
+import kotlin.coroutines.CoroutineContext
 
 abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {
     abstract fun attachNavController(navController: NavController)
@@ -26,7 +34,12 @@ abstract class NavigationMiddleware : TypedMiddleware<Nav>(Nav::class) {
 
 internal class NavigationMiddlewareImpl(
         private val ctx: Context
-) : NavigationMiddleware(), NavController.OnDestinationChangedListener, KoinComponent {
+) : NavigationMiddleware(), NavController.OnDestinationChangedListener, KoinComponent, LifecycleObserver, CoroutineScope {
+    private val job = SupervisorJob()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     override var debug: Boolean = false
 
     private val dispatcher: ActionDispatcher by inject()
@@ -41,7 +54,35 @@ internal class NavigationMiddlewareImpl(
     private val destinationsMapReadable: Map<String, String>
         get() = destinationsMap.mapKeys { idName(it.key) }.mapValues { idName(it.value) }
 
+    private val navActionsChannel = Channel<Nav>(Channel.UNLIMITED)
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    private fun onResume() {
+        launch {
+            awaitFrame()
+            for (action in navActionsChannel) {
+                tryNavigate(action)
+                delay(NAVIGATION_DEBOUNCE_TIME_MS)
+            }
+        }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    private fun onPause() {
+        job.cancelChildren()
+    }
+
     override fun attachActivity(activity: Activity) {
+        require(activity is LifecycleOwner) {
+            "Only activities implementing `LifecycleOwner` interface are supported"
+        }
+
+        val oldActivity = this.activity.get()
+        if (oldActivity != activity) {
+            (oldActivity as? LifecycleOwner)?.lifecycle?.removeObserver(this)
+        }
+
+        activity.lifecycle.addObserver(this)
         this.activity = WeakReference(activity)
     }
 
@@ -60,7 +101,7 @@ internal class NavigationMiddlewareImpl(
     }
 
     override fun run(next: (Any) -> Any, action: Nav): Any {
-        tryNavigate(action)
+        navActionsChannel.offer(action)
         return next(action)
     }
 
@@ -110,5 +151,12 @@ internal class NavigationMiddlewareImpl(
         if (debug) {
             Log.d("NavigationMiddleware", "onDestinationChanged, destinations: ${destinationsMapReadable}")
         }
+    }
+
+    companion object {
+        /**
+         * Makes navigation a bit more predictable in cases when two or more actions are dispatched in a quick succession.
+         */
+        private const val NAVIGATION_DEBOUNCE_TIME_MS = 100L
     }
 }
