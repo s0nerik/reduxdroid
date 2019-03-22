@@ -6,6 +6,8 @@ import me.tatarka.redux.SimpleStore
 class StateStore(initialState: AppState) {
     internal val store = SimpleStore<AppState>(initialState)
 
+    private val realListeners = mutableMapOf<(AppState) -> Unit, StoreListener>()
+
     var state: AppState
         get() = store.state
         set(newState) {
@@ -13,10 +15,24 @@ class StateStore(initialState: AppState) {
         }
 
     fun addListener(listener: (AppState) -> Unit) {
-        store.addListener(listener)
+        if (realListeners[listener] != null)
+            return
+
+        val wrappedListener = StoreListener(listener)
+        store.addListener(wrappedListener)
     }
 
     fun removeListener(listener: (AppState) -> Unit) {
-        store.removeListener(listener)
+        realListeners[listener]?.let {
+            store.removeListener(it)
+        }
+    }
+}
+
+private class StoreListener(
+        private val listener: (AppState) -> Unit
+) : SimpleStore.Listener<AppState> {
+    override fun onNewState(state: AppState) {
+        listener(state)
     }
 }
