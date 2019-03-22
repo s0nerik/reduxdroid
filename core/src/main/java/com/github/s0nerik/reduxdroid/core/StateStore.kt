@@ -20,6 +20,7 @@ class StateStore(initialState: AppState) {
 
         val wrappedListener = StoreListener(listener)
         store.addListener(wrappedListener)
+        realListeners[listener] = wrappedListener
     }
 
     fun removeListener(listener: (AppState) -> Unit) {
