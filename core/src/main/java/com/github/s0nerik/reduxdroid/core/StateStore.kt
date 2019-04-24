@@ -26,6 +26,7 @@ class StateStore(initialState: AppState) {
     fun removeListener(listener: (AppState) -> Unit) {
         realListeners[listener]?.let {
             store.removeListener(it)
+            realListeners.remove(listener)
         }
     }
 }
